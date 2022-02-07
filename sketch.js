@@ -10,12 +10,42 @@ function preload() {
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
+
+    //generate random characters
+
+    // for(let r = 0; r < 5; r++) {
+    //     board[r] = [];
+    //     for(let c = 0; c < 5; c++) {
+    //         board[r][c] = String.fromCharCode(parseInt(random(65, 91)));
+    //     }
+    // }
+
+    //generate five words and scramble
+    let words = [];
+
+    for(let i = 0; i < 5; i++) {
+        words[i] = dict[Math.floor(random(0, dict.length))].shuffle().toUpperCase();
+    }
+
     for(let r = 0; r < 5; r++) {
         board[r] = [];
         for(let c = 0; c < 5; c++) {
-            board[r][c] = String.fromCharCode(parseInt(random(65, 91)));
+            board[r][c] = words[r].split("")[c];
         }
     }
+}
+
+String.prototype.shuffle = function () {
+    var a = this.split(""),
+        n = a.length;
+
+    for(var i = n - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    }
+    return a.join("");
 }
 
 function draw() {
@@ -31,6 +61,8 @@ function draw() {
     textSize(tileSize/2);
     for(let r = 0; r < 5; r++) {
         for(let c = 0; c < 5; c++) {
+            fill(80);
+            rect(width/2 + c * tileSize - 2 * tileSize, height/2 + r * tileSize - 2 * tileSize, tileSize * 9.4 / 10, tileSize * 9.4 / 10, tileSize/5);
             fill(130);
             rect(width/2 + c * tileSize - 2 * tileSize, height/2 + r * tileSize - 2 * tileSize, tileSize * 9 / 10, tileSize * 9 / 10, tileSize/5);
             fill(255);
