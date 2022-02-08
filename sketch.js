@@ -1,8 +1,9 @@
-let tileSize = 100;
+let tileSize;
 let board = [];
 let rot = 0; //how much we've rotated a rot or col
 let dict;
 let wordsFound = [];
+let score = 0;
 
 function preload() {
     dict = loadStrings("WordleWords.txt")
@@ -11,6 +12,8 @@ function preload() {
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
+
+    tileSize = height / 16 + width / 32;
 
     //generate random characters
 
@@ -51,6 +54,15 @@ String.prototype.shuffle = function () {
 
 function draw() {
     background(51);
+
+    fill(0);
+    noStroke();;
+    textFont("Trebuchet MS");
+    textSize(70);
+    textAlign(CENTER, CENTER);
+    text("SCORE: " + score, width / 2, height / 8);
+
+    textFont("Arial");
     stroke(0);
     strokeWeight(10);
     noFill();
@@ -177,9 +189,11 @@ function checkWords() {
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
+            score += 100;
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
+            score += 100;
         }
     }
 
@@ -202,9 +216,11 @@ function checkWords() {
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
+            score += 100;
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
+            score += 100;
         }
     }
 }
