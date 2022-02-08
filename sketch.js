@@ -53,7 +53,7 @@ String.prototype.shuffle = function () {
 }
 
 function draw() {
-    background(51);
+    background(255);
 
     fill(0);
     noStroke();;
@@ -67,7 +67,7 @@ function draw() {
     strokeWeight(10);
     noFill();
     rectMode(CENTER);
-    rect(width / 2, height / 2, tileSize * 5, tileSize * 5, tileSize / 4);
+    // rect(width / 2, height / 2, tileSize * 5, tileSize * 5, tileSize / 4);
 
     for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 5; c++) {
