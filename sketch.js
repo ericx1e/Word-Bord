@@ -137,17 +137,24 @@ function touchStarted() {
             touchStartY = mouseY;
         }
     }
+    return false;
 }
 
 function touchEnded() {
     touchStartX = -1;
     touchStartY = -1;
     rot = 0;
+    return false;
 }
 
+function touchMoved() {
+    return false;
+}
+
+
 function checkWords() {
-    for(let r = 0; r < 5; r++) {
-        for(let c = 0; c < 5; c++) {
+    for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
             board[r][c].highlight = false;
         }
     }
@@ -163,17 +170,17 @@ function checkWords() {
         for (let c = 0; c < 5; c++) {
             if (dict.includes(str) && !wordsFound.includes(str)) {
                 board[r][c].highlightDur = 180;
-            } 
+            }
             if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
                 board[r][c].highlightDur = 180;
-            } 
+            }
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
-        } 
+        }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
-        } 
+        }
     }
 
     for (let c = 0; c < 5; c++) {
@@ -181,24 +188,24 @@ function checkWords() {
         let revStr = "";
         for (let r = 0; r < 5; r++) {
             str += board[r][c].s;
-            revStr += board[4-r][c].s;
+            revStr += board[4 - r][c].s;
         }
         str = str.toLowerCase();
         revStr = revStr.toLowerCase();
         for (let r = 0; r < 5; r++) {
             if (dict.includes(str) && !wordsFound.includes(str)) {
                 board[r][c].highlightDur = 180;
-            } 
+            }
             if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
                 board[r][c].highlightDur = 180;
-            } 
+            }
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
-        } 
+        }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
-        } 
+        }
     }
 }
 
