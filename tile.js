@@ -10,9 +10,9 @@ function Tile(r, c, s) {
         noStroke();
         textAlign(CENTER, CENTER);
         textSize(tileSize / 2);
-        if(this.highlightDur > 0) {
+        if (this.highlightDur > 0) {
             fill(80, 80 + this.highlightDur, 80);
-            this.highlightDur-=3;
+            this.highlightDur -= 3;
         } else {
             fill(80);
         }
@@ -28,10 +28,10 @@ function Tile(r, c, s) {
         this.c = c;
     }
 
-    this.update = function() {
-        this.x = lerp(this.x, width / 2 + c * tileSize - 2 * tileSize, 1);
+    this.update = function () {
+        this.x = lerp(this.x, width / 2 + this.c * tileSize - 2 * tileSize, 0.1);
         // console.log(this.x);
-        this.y = lerp(this.y, height / 2 + r * tileSize - 2 * tileSize, 1);
+        this.y = lerp(this.y, height / 2 + this.r * tileSize - 2 * tileSize, 0.1);
     }
 }
 
