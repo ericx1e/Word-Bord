@@ -4,6 +4,7 @@ let rot = 0; //how much we've rotated a rot or col
 let dict;
 let wordsFound = [];
 let score = 0;
+let fadingTexts = [];
 
 function preload() {
     dict = loadStrings("WordleWords.txt")
@@ -37,6 +38,7 @@ function setup() {
             board[r][c] = new Tile(r, c, words[r].split("")[c]);
         }
     }
+
 }
 
 String.prototype.shuffle = function () {
@@ -92,6 +94,21 @@ function draw() {
     checkWords();
 
     // text("fps: " + Math.floor(frameRate()), width / 2, height / 8);
+
+    // for(let i = 0; i < fadingTexts.length; i++) {
+    //     fadingTexts[0].show();
+    //     if(fadingText[0].life > 
+    //     if(fadingTexts[0].life < 0) {
+    //         fadingTexts.splice(0, 1);
+    //     }
+    // }
+
+    if(fadingTexts.length > 0) {
+        fadingTexts[0].show();
+        if(fadingTexts[0].life < 0) {
+            fadingTexts.splice(0, 1);
+        }
+    }
 }
 
 
@@ -190,10 +207,12 @@ function checkWords() {
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
             score += 100;
+            fadingTexts.push(new FadingText(width/4, height/2, str));
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
             score += 100;
+            fadingTexts.push(new FadingText(width/4, height/2, revStr));
         }
     }
 
@@ -217,10 +236,12 @@ function checkWords() {
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
             score += 100;
+            fadingTexts.push(new FadingText(width/4, height/2, str));
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
             score += 100;
+            fadingTexts.push(new FadingText(width/4, height/2, revStr));
         }
     }
 }
