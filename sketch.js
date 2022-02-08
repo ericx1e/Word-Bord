@@ -2,6 +2,7 @@ let tileSize = 100;
 let board = [];
 let rot = 0; //how much we've rotated a rot or col
 let dict;
+let wordsFound = [];
 
 function preload() {
     dict = loadStrings("WordleWords.txt")
@@ -59,6 +60,7 @@ function draw() {
     for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 5; c++) {
             board[r][c].show();
+            board[r][c].update();
         }
     }
 
@@ -75,6 +77,7 @@ function draw() {
             }
         }
     }
+    checkWords();
 
     // text("fps: " + Math.floor(frameRate()), width / 2, height / 8);
 }
@@ -140,42 +143,62 @@ function touchEnded() {
     touchStartX = -1;
     touchStartY = -1;
     rot = 0;
-    checkWords();
 }
 
 function checkWords() {
+    for(let r = 0; r < 5; r++) {
+        for(let c = 0; c < 5; c++) {
+            board[r][c].highlight = false;
+        }
+    }
     for (let r = 0; r < 5; r++) {
         let str = "";
         let revStr = "";
         for (let c = 0; c < 5; c++) {
-            str += board[r][c];
-            revStr += board[r][4 - c];
+            str += board[r][c].s;
+            revStr += board[r][4 - c].s;
         }
         str = str.toLowerCase();
         revStr = revStr.toLowerCase();
-        if (dict.includes(str)) {
-            console.log(str);
+        for (let c = 0; c < 5; c++) {
+            if (dict.includes(str) && !wordsFound.includes(str)) {
+                board[r][c].highlightDur = 180;
+            } 
+            if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
+                board[r][c].highlightDur = 180;
+            } 
         }
-        if (dict.includes(revStr)) {
-            console.log(revStr);
-        }
+        if (dict.includes(str) && !wordsFound.includes(str)) {
+            wordsFound.push(str);
+        } 
+        if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
+            wordsFound.push(revStr);
+        } 
     }
 
     for (let c = 0; c < 5; c++) {
         let str = "";
         let revStr = "";
         for (let r = 0; r < 5; r++) {
-            str += board[r][c];
-            revStr += board[r][4 - c];
+            str += board[r][c].s;
+            revStr += board[4-r][c].s;
         }
         str = str.toLowerCase();
         revStr = revStr.toLowerCase();
-        if (dict.includes(str)) {
-            console.log(str);
+        for (let r = 0; r < 5; r++) {
+            if (dict.includes(str) && !wordsFound.includes(str)) {
+                board[r][c].highlightDur = 180;
+            } 
+            if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
+                board[r][c].highlightDur = 180;
+            } 
         }
-        if (dict.includes(revStr)) {
-            console.log(revStr);
-        }
+        if (dict.includes(str) && !wordsFound.includes(str)) {
+            wordsFound.push(str);
+        } 
+        if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
+            wordsFound.push(revStr);
+        } 
     }
 }
 
