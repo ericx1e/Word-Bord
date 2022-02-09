@@ -91,7 +91,6 @@ function draw() {
             }
         }
     }
-    checkWords();
 
     // text("fps: " + Math.floor(frameRate()), width / 2, height / 8);
 
@@ -174,6 +173,7 @@ function touchStarted() {
 }
 
 function touchEnded() {
+    checkWords();
     touchStartX = -1;
     touchStartY = -1;
     rot = 0;

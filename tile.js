@@ -10,14 +10,24 @@ function Tile(r, c, s) {
         noStroke();
         textAlign(CENTER, CENTER);
         textSize(tileSize / 2);
+
         if (this.highlightDur > 0) {
             fill(80, 80 + this.highlightDur, 80);
             this.highlightDur -= 3;
         } else {
             fill(80);
         }
+
         rect(this.x, this.y, tileSize * 9.4 / 10, tileSize * 9.4 / 10, tileSize / 5);
-        fill(130);
+        // fill(130);
+        
+        if (this.highlightDur > 0) {
+            fill(130, 130 + this.highlightDur, 130);
+            this.highlightDur -= 3;
+        } else {
+            fill(130);
+        }
+
         rect(this.x, this.y, tileSize * 9 / 10, tileSize * 9 / 10, tileSize / 5);
         fill(255);
         text(this.s, this.x, this.y);
