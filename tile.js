@@ -37,5 +37,5 @@ function Tile(r, c, s) {
 
 
 function lerp(start, end, amt) {
-    return (1 - amt) * start + amt * end
+    return (1 - amt) * start + amt * end;
 }

@@ -103,10 +103,14 @@ function draw() {
     //     }
     // }
 
-    if(fadingTexts.length > 0) {
-        fadingTexts[0].show();
-        if(fadingTexts[0].life < 0) {
-            fadingTexts.splice(0, 1);
+    for (let i = 0; i < fadingTexts.length; i++) {
+        fadingTexts[i].show();
+        if (fadingTexts[i].life > 150) {
+            break;
+        }
+        if (fadingTexts[i].life < 0) {
+            fadingTexts.splice(i, 1);
+            i--;
         }
     }
 }
@@ -207,12 +211,12 @@ function checkWords() {
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
             score += 100;
-            fadingTexts.push(new FadingText(width/4, height/2, str));
+            fadingTexts.push(new FadingText(width / 4, height / 2, str));
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
             score += 100;
-            fadingTexts.push(new FadingText(width/4, height/2, revStr));
+            fadingTexts.push(new FadingText(width / 4, height / 2, revStr));
         }
     }
 
@@ -236,12 +240,12 @@ function checkWords() {
         if (dict.includes(str) && !wordsFound.includes(str)) {
             wordsFound.push(str);
             score += 100;
-            fadingTexts.push(new FadingText(width/4, height/2, str));
+            fadingTexts.push(new FadingText(width / 4, height / 2, str));
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             wordsFound.push(revStr);
             score += 100;
-            fadingTexts.push(new FadingText(width/4, height/2, revStr));
+            fadingTexts.push(new FadingText(width / 4, height / 2, revStr));
         }
     }
 }
