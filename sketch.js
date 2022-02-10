@@ -4,7 +4,11 @@ let rot = 0; //how much we've rotated a rot or col
 let dict;
 let wordsFound = [];
 let score = 0;
+let scorePulse = 0;
 let fadingTexts = [];
+let moves = 0;
+let rotatingRows = false;
+let rotatingCol = false;
 
 function preload() {
     dict = loadStrings("WordleWords.txt")
@@ -60,9 +64,15 @@ function draw() {
     fill(0);
     noStroke();;
     textFont("Trebuchet MS");
-    textSize(70);
+    textSize(70 + scorePulse);
+    if (scorePulse > 0) {
+        scorePulse--;
+    }
     textAlign(CENTER, CENTER);
     text("SCORE: " + score, width / 2, height / 8);
+    textSize(50);
+    textAlign(CENTER, CENTER);
+    text("MOVES: " + moves, width / 2, height * 7 / 8);
 
     textFont("Arial");
     stroke(0);
@@ -174,9 +184,14 @@ function touchStarted() {
 
 function touchEnded() {
     checkWords();
+    if (rot % 5 != 0) {
+        moves++;
+    }
     touchStartX = -1;
     touchStartY = -1;
     rot = 0;
+    rotatingRows = false;
+    rotatingCol = false;
     return false;
 }
 
@@ -209,14 +224,10 @@ function checkWords() {
             }
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
-            wordsFound.push(str);
-            score += 100;
-            fadingTexts.push(new FadingText(width / 4, height / 2, str));
+            scoreWord(str);
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
-            wordsFound.push(revStr);
-            score += 100;
-            fadingTexts.push(new FadingText(width / 4, height / 2, revStr));
+            scoreWord(revStr);
         }
     }
 
@@ -238,15 +249,22 @@ function checkWords() {
             }
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
-            wordsFound.push(str);
-            score += 100;
-            fadingTexts.push(new FadingText(width / 4, height / 2, str));
+            scoreWord(str);
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
-            wordsFound.push(revStr);
-            score += 100;
-            fadingTexts.push(new FadingText(width / 4, height / 2, revStr));
+            scoreWord(revStr);
         }
     }
 }
 
+function scoreWord(str) {
+    wordsFound.push(str);
+    // fadingTexts.push(new FadingText(width / 2, height / 8, "+100"));
+    score += 100;
+    scorePulse = 10;
+    if (width > height) {
+        fadingTexts.push(new FadingText(width / 4, height / 2, str));
+    } else {
+        fadingTexts.push(new FadingText(width / 2, height / 4, str));
+    }
+}

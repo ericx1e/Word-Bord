@@ -3,13 +3,13 @@ function FadingText(x, y, s) {
     this.x = x;
     this.y = y;
     this.s = s;
-    
-    this.show = function() {
+
+    this.show = function () {
         fill(50, this.life);
         noStroke();
-        textSize(50);
+        textSize(height / 50 + width / 50);
         text(this.s, this.x, this.y);
         this.y -= 1;
-        this.life-=2;
+        this.life -= 2;
     }
 }
