@@ -42,7 +42,7 @@ function setup() {
             board[r][c] = new Tile(r, c, words[r].split("")[c]);
         }
     }
-
+    checkWords();
 }
 
 String.prototype.shuffle = function () {
