@@ -8,17 +8,18 @@ let scorePulse = 0;
 let fadingTexts = [];
 let moves = 0;
 let rotatingRows = false;
-let rotatingCol = false;
+let rotatingCols = false;
 
 function preload() {
     dict = loadStrings("WordleWords.txt")
+    font = loadFont("Ubuntu/Ubuntu-Light.ttf")
 }
 
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
 
-    tileSize = height / 16 + width / 32;
+    tileSize = height / 18 + width / 36;
 
     //generate random characters
 
@@ -62,17 +63,20 @@ function draw() {
     background(255);
 
     fill(0);
-    noStroke();;
-    textFont("Trebuchet MS");
-    textSize(70 + scorePulse);
+    noStroke();
+    textFont(font);
+    textSize(tileSize / 2 + scorePulse);
     if (scorePulse > 0) {
         scorePulse--;
     }
     textAlign(CENTER, CENTER);
-    text("SCORE: " + score, width / 2, height / 8);
-    textSize(50);
+    text("SCORE: " + score, width / 2, height * 13.5 / 16);
+    // textSize(tileSize/2.5);
     textAlign(CENTER, CENTER);
-    text("MOVES: " + moves, width / 2, height * 7 / 8);
+    text("MOVES: " + moves, width / 2, height * 15 / 16);
+
+    textSize(tileSize);
+    text("WORD BORD", width/2, height/8);
 
     textFont("Arial");
     stroke(0);
@@ -90,17 +94,22 @@ function draw() {
 
     if (touchStartX != -1 && touchStartY != -1) {
         if (Math.abs(mouseX - touchStartX) > Math.abs(mouseY - touchStartY)) {
-            if (parseInt((mouseX - touchStartX) / tileSize) - rot != 0) {
+            if (parseInt((mouseX - touchStartX) / tileSize) - rot != 0 && !rotatingCols) {
+                rotatingRows = true;
                 rotateRow(selectedRow, parseInt((mouseX - touchStartX) / tileSize) - rot);
                 rot += parseInt((mouseX - touchStartX) / tileSize) - rot;
             }
         } else {
-            if (parseInt((mouseY - touchStartY) / tileSize) - rot != 0) {
+            if (parseInt((mouseY - touchStartY) / tileSize) - rot != 0 && !rotatingRows) {
+                rotatingCols = true;
                 rotateCol(selectedCol, parseInt((mouseY - touchStartY) / tileSize) - rot);
                 rot += parseInt((mouseY - touchStartY) / tileSize) - rot;
             }
         }
     }
+
+
+
 
     // text("fps: " + Math.floor(frameRate()), width / 2, height / 8);
 
@@ -191,7 +200,7 @@ function touchEnded() {
     touchStartY = -1;
     rot = 0;
     rotatingRows = false;
-    rotatingCol = false;
+    rotatingCols = false;
     return false;
 }
 

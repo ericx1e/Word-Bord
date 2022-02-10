@@ -7,18 +7,19 @@ function Tile(r, c, s) {
     this.highlightDur = 0;
 
     this.show = function () {
-        noStroke();
+        // noStroke();
         textAlign(CENTER, CENTER);
         textSize(tileSize / 2);
 
         if (this.highlightDur > 0) {
-            fill(80, 80 + this.highlightDur, 80);
+            stroke(80, 80 + this.highlightDur, 80);
             this.highlightDur -= 3;
         } else {
-            fill(80);
+            stroke(80);
         }
+        strokeWeight(3);
 
-        rect(this.x, this.y, tileSize * 9.4 / 10, tileSize * 9.4 / 10, tileSize / 5);
+        // rect(this.x, this.y, tileSize * 9.4 / 10, tileSize * 9.4 / 10, tileSize / 5);
         // fill(130);
         
         if (this.highlightDur > 0) {
@@ -30,6 +31,7 @@ function Tile(r, c, s) {
 
         rect(this.x, this.y, tileSize * 9 / 10, tileSize * 9 / 10, tileSize / 5);
         fill(255);
+        noStroke();
         text(this.s, this.x, this.y);
     }
 
@@ -40,7 +42,6 @@ function Tile(r, c, s) {
 
     this.update = function () {
         this.x = lerp(this.x, width / 2 + this.c * tileSize - 2 * tileSize, 0.2);
-        // console.log(this.x);
         this.y = lerp(this.y, height / 2 + this.r * tileSize - 2 * tileSize, 0.2);
     }
 }
