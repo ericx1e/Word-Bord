@@ -2,19 +2,22 @@ let tileSize;
 let board = [];
 let rot = 0; //how much we've rotated a rot or col
 let dict;
+let boards;
 let wordsFound = [];
 let score = 0;
 let scorePulse = 0;
 let fadingTexts = [];
-let moves = 0;
+let moves = 50;
 let rotatingRows = false;
 let rotatingCols = false;
 let isPopup = false;
 let popup;
+let days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 function preload() {
-    dict = loadStrings("WordleWords.txt")
-    font = loadFont("Ubuntu/Ubuntu-Light.ttf")
+    dict = loadStrings("words.txt");
+    boards = loadStrings("boards.txt");
+    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
 }
 
 function setup() {
@@ -22,6 +25,13 @@ function setup() {
     canvas.position(0, 0);
     popup = new Popup("welcome");
     tileSize = height / 18 + width / 36;
+
+    let dayIndex = day() + (year() - 2022) * 365; //basically day of tne year for the next two years
+    for(let i = 0; i < month() - 1; i++) {
+        dayIndex += days2022[i];
+    }
+    // dayIndex = parseInt(random(0, 365*2));
+    // console.log(dayIndex);
 
     //generate random characters
 
@@ -33,18 +43,29 @@ function setup() {
     // }
 
     //generate five words and scramble
-    let words = [];
-
-    for (let i = 0; i < 5; i++) {
-        words[i] = dict[Math.floor(random(0, dict.length))].shuffle().toUpperCase();
-    }
-
-    for (let r = 0; r < 5; r++) {
-        board[r] = [];
-        for (let c = 0; c < 5; c++) {
-            board[r][c] = new Tile(r, c, words[r].split("")[c]);
+    if(dayIndex >= boards.length) {
+        let words = [];
+    
+        for (let i = 0; i < 5; i++) {
+            words[i] = dict[Math.floor(random(0, dict.length))].shuffle().toUpperCase();
+        }
+    
+        for (let r = 0; r < 5; r++) {
+            board[r] = [];
+            for (let c = 0; c < 5; c++) {
+                board[r][c] = new Tile(r, c, words[r].split("")[c]);
+            }
+        }
+    } else {
+        //generate from file
+        for(let r = 0; r < 5; r++) {
+            board[r] = [];
+            for(let c = 0; c < 5; c++) {
+                board[r][c] = new Tile(r, c, boards[dayIndex * 5 + r].split("")[c].toUpperCase());
+            }
         }
     }
+
     checkWords();
 }
 
@@ -189,6 +210,10 @@ function touchStarted() {
         popup.onClick();
         return false;
     }
+    if(moves <= 0) {
+        popup = new Popup("gameover");
+        return false;
+    }
     selectedRow = parseInt((mouseY - height / 2 + tileSize * 2 + tileSize / 2) / tileSize);
     selectedCol = parseInt((mouseX - width / 2 + tileSize * 2 + tileSize / 2) / tileSize);
     fill(255);
@@ -202,9 +227,12 @@ function touchStarted() {
 }
 
 function touchEnded() {
+    if(moves <= 0) {
+        return false;
+    }
     checkWords();
     if (rot % 5 != 0) {
-        moves++;
+        moves--;
     }
     touchStartX = -1;
     touchStartY = -1;
