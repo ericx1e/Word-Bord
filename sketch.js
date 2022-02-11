@@ -6,6 +6,7 @@ let boards;
 let wordsFound = [];
 let score = 0;
 let scorePulse = 0;
+let movesPulse = 0;
 let fadingTexts = [];
 let moves = 50;
 let rotatingRows = false;
@@ -84,18 +85,24 @@ String.prototype.shuffle = function () {
 }
 
 function draw() {
-    background(255);
+    // background(255);
+    rectMode(CORNER);
+    fill(255, 100);
+    rect(0, 0, width, height);
 
     fill(0);
     noStroke();
     textFont(font);
     textSize(tileSize / 2 + scorePulse);
     if (scorePulse > 0) {
-        scorePulse--;
+        scorePulse-=0.7;
     }
     textAlign(CENTER, CENTER);
     text("SCORE: " + score, width / 2, height * 13.5 / 16);
-    // textSize(tileSize/2.5);
+    textSize(tileSize / 2 + movesPulse);
+    if (movesPulse > 0) {
+        movesPulse-=0.5;
+    }
     textAlign(CENTER, CENTER);
     text("MOVES: " + moves, width / 2, height * 15 / 16);
 
@@ -234,6 +241,7 @@ function touchEnded() {
     checkWords();
     if (rot % 5 != 0) {
         moves--;
+        movesPulse = 3;
     }
     touchStartX = -1;
     touchStartY = -1;
@@ -309,7 +317,7 @@ function scoreWord(str) {
     wordsFound.push(str);
     // fadingTexts.push(new FadingText(width / 2, height / 8, "+100"));
     score += 100;
-    scorePulse = 10;
+    scorePulse = 8;
     if (width > height) {
         fadingTexts.push(new FadingText(width / 4, height / 2, str.toUpperCase()));
     } else {
