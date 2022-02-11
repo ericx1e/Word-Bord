@@ -9,6 +9,8 @@ let fadingTexts = [];
 let moves = 0;
 let rotatingRows = false;
 let rotatingCols = false;
+let isPopup = false;
+let popup;
 
 function preload() {
     dict = loadStrings("WordleWords.txt")
@@ -18,7 +20,7 @@ function preload() {
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
-
+    popup = new Popup("welcome");
     tileSize = height / 18 + width / 36;
 
     //generate random characters
@@ -76,7 +78,7 @@ function draw() {
     text("MOVES: " + moves, width / 2, height * 15 / 16);
 
     textSize(tileSize);
-    text("WORD BORD", width/2, height/8);
+    text("WORD BORD", width / 2, height / 8);
 
     textFont("Arial");
     stroke(0);
@@ -131,6 +133,10 @@ function draw() {
             i--;
         }
     }
+
+    if (isPopup) {
+        popup.show();
+    }
 }
 
 
@@ -179,6 +185,10 @@ let selectedRow = -1;
 let selectedCol = -1;
 
 function touchStarted() {
+    if (isPopup) {
+        popup.onClick();
+        return false;
+    }
     selectedRow = parseInt((mouseY - height / 2 + tileSize * 2 + tileSize / 2) / tileSize);
     selectedCol = parseInt((mouseX - width / 2 + tileSize * 2 + tileSize / 2) / tileSize);
     fill(255);
