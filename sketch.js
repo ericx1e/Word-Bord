@@ -18,6 +18,7 @@ function preload() {
     dict = loadStrings("words.txt");
     boards = loadStrings("boards.txt");
     font = loadFont("Ubuntu/Ubuntu-Light.ttf");
+    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
 }
 
 function setup() {
@@ -310,8 +311,8 @@ function scoreWord(str) {
     score += 100;
     scorePulse = 10;
     if (width > height) {
-        fadingTexts.push(new FadingText(width / 4, height / 2, str));
+        fadingTexts.push(new FadingText(width / 4, height / 2, str.toUpperCase()));
     } else {
-        fadingTexts.push(new FadingText(width / 2, height / 4, str));
+        fadingTexts.push(new FadingText(width / 2, height / 4, str.toUpperCase()));
     }
 }
