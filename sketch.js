@@ -16,41 +16,21 @@ let rotatingCols = false;
 let isPopup = false;
 let popup;
 let days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+let boardCreated = false;
 // let fa;
 
 //settings
 let darkMode = false;
 
 function preload() {
-    dict = loadStrings("dictionaries/words" + boardSize + ".txt");
-    boards = loadStrings("boards/boards" + boardSize + ".txt");
-    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
-    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
-    // fa = loadFont('fa.otf');
 }
 
-function setup() {
-    canvas = createCanvas(window.innerWidth, window.innerHeight);
-    canvas.position(0, 0);
-    popup = new Popup("welcome");
-    tileSize = height / 18 + width / 36 * 5 / boardSize;
-
+function createBoard() {
+    tileSize = height / 18 + width / 36 * 5 / 5;
     let dayIndex = day() + (year() - 2022) * 365; //basically day of tne year for the next two years
     for (let i = 0; i < month() - 1; i++) {
         dayIndex += days2022[i];
     }
-    // dayIndex = parseInt(random(0, 365*2));
-    // console.log(dayIndex);
-
-    //generate random characters
-
-    // for(let r = 0; r < 5; r++) {
-    //     board[r] = [];
-    //     for(let c = 0; c < 5; c++) {
-    //         board[r][c] = String.fromCharCode(parseInt(random(65, 91)));
-    //     }
-    // }
-
     //generate five words and scramble
     if (dayIndex >= boards.length) {
         let words = [];
@@ -76,6 +56,31 @@ function setup() {
     }
 
     checkWords();
+    boardCreated = true;
+    loop();
+}
+
+function setup() {
+    canvas = createCanvas(window.innerWidth, window.innerHeight);
+    canvas.position(0, 0);
+    popup = new Popup("welcome");
+    noLoop();
+    dict = loadStrings("dictionaries/words" + boardSize + ".txt");
+    boards = loadStrings("boards/boards" + boardSize + ".txt", createBoard);
+    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
+    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
+
+    // dayIndex = parseInt(random(0, 365*2));
+    // console.log(dayIndex);
+
+    //generate random characters
+
+    // for(let r = 0; r < 5; r++) {
+    //     board[r] = [];
+    //     for(let c = 0; c < 5; c++) {
+    //         board[r][c] = String.fromCharCode(parseInt(random(65, 91)));
+    //     }
+    // }
 }
 
 String.prototype.shuffle = function () {
@@ -92,6 +97,9 @@ String.prototype.shuffle = function () {
 }
 
 function draw() {
+    if (!boardCreated) {
+        return;
+    }
     if (isPopup) {
         background(255);
     } else {
@@ -338,5 +346,10 @@ function scoreWord(str) {
 function keyPressed() {
     if (key == ' ') {
         popup = new Popup("settings");
+    }
+    if (key == '1') {
+        boardSize = 4;
+        preload();
+        setup();
     }
 }
