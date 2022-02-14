@@ -1,8 +1,8 @@
 function Tile(r, c, s) {
     this.r = r;
     this.c = c
-    this.x = width / 2 + c * tileSize - 2 * tileSize;
-    this.y = height / 2 + r * tileSize - 2 * tileSize;
+    this.x = width / 2 + c * tileSize - (boardSize - 1) / 2 * tileSize;
+    this.y = height / 2 + r * tileSize - (boardSize - 1) / 2 * tileSize;
     this.s = s;
     this.highlightDur = 0;
 
@@ -21,7 +21,7 @@ function Tile(r, c, s) {
 
         // rect(this.x, this.y, tileSize * 9.4 / 10, tileSize * 9.4 / 10, tileSize / 5);
         // fill(130);
-        
+
         if (this.highlightDur > 0) {
             fill(130, 130 + this.highlightDur, 130);
             this.highlightDur -= 3;
@@ -41,8 +41,8 @@ function Tile(r, c, s) {
     }
 
     this.update = function () {
-        this.x = lerp(this.x, width / 2 + this.c * tileSize - 2 * tileSize, 0.2);
-        this.y = lerp(this.y, height / 2 + this.r * tileSize - 2 * tileSize, 0.2);
+        this.x = lerp(this.x, width / 2 + this.c * tileSize - (boardSize - 1) / 2 * tileSize, 0.2);
+        this.y = lerp(this.y, height / 2 + this.r * tileSize - (boardSize - 1) / 2 * tileSize, 0.2);
     }
 }
 

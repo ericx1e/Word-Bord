@@ -6,13 +6,28 @@ function Popup(id) {
     this.h = height * 7 / 10;
     this.lineLen = this.w / 80;
     this.closing = false;
+    this.buttons = [];
+
+    if (id == "settings") {
+        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, -this.h / 4, "dark mode"));
+        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, -this.h / 8, "dark mode"));
+        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, 0, "dark mode"));
+        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 8, "dark mode"));
+        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 4, "dark mode"));
+    }
 
     this.show = function () {
 
         if (!this.closing) {
             this.y = lerp(this.y, height / 2, 0.1);
+            this.buttons.forEach(button => {
+                button.y = lerp(button.y, height / 2 + button.offset, 0.1);
+            });
         } else {
             this.y = lerp(this.y, height * 3 / 2, 0.07);
+            this.buttons.forEach(button => {
+                button.y = lerp(button.y, height * 3 / 2 + button.offset, 0.07);
+            });
         }
         if (this.y > height * 10 / 7 && this.closing) {
             isPopup = false;
@@ -40,7 +55,15 @@ function Popup(id) {
             case "gameover":
                 text("Out of moves!\n\n\nYou scored " + score + " points \n\nReload the page to try again or come back tomorrow for a new Word Bord", this.x, this.y - this.h / 4, this.w * 9 / 10);
                 break;
+            case "settings":
+                text("Settings", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
+                break;
         }
+
+        this.buttons.forEach(button => {
+            button.show();
+            button.update();
+        });
 
         push();
         stroke(0);
@@ -55,5 +78,8 @@ function Popup(id) {
         if (dist(this.x + this.w * 7 / 16, this.y - this.h * 7 / 16, mouseX, mouseY) < this.lineLen * 2) {
             this.closing = true;
         }
+        this.buttons.forEach(button => {
+            button.click();
+        });
     }
 }
