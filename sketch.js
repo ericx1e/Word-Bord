@@ -1,7 +1,10 @@
 let boardSize = 5;
 
+let firstLoad = true;
+
 let tileSize;
 let board = [];
+let buttons = [];
 let rot = 0; //how much we've rotated a rot or col
 let dict;
 let boards;
@@ -17,10 +20,12 @@ let isPopup = false;
 let popup;
 let days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 let boardCreated = false;
+// let screenFade = 0;
 // let fa;
 
 //settings
 let darkMode = false;
+let darkModeColor = 0;
 
 function preload() {
 }
@@ -61,14 +66,21 @@ function createBoard() {
 }
 
 function setup() {
+    boardCreated = false;
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
-    popup = new Popup("welcome");
+    if(firstLoad) {
+        popup = new Popup("welcome");
+        firstLoad = false;
+    }
     noLoop();
     dict = loadStrings("dictionaries/words" + boardSize + ".txt");
     boards = loadStrings("boards/boards" + boardSize + ".txt", createBoard);
     font = loadFont("Ubuntu/Ubuntu-Light.ttf");
     font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
+    icons = loadFont("fa.otf");
+
+    buttons.push(new Button(width - (width/30 + height/30), height - (width/30 + height/30), width/40, "settings"));
 
     // dayIndex = parseInt(random(0, 365*2));
     // console.log(dayIndex);
@@ -98,17 +110,35 @@ String.prototype.shuffle = function () {
 
 function draw() {
     if (!boardCreated) {
+        // background(255);
+        // textSize(100);
+        // fill(0);
+        // noStroke();
+        // textAlign(CENTER, CENTER);
+        // text("LOADING", width/2, height/2);
+
         return;
     }
-    if (isPopup) {
-        background(255);
+    // if(board[0][0] == undefined) {
+    //     return;
+    // }
+
+    // if (isPopup) {
+    //     background(255 - darkModeColor);
+    // } else {
+    //     rectMode(CORNER);
+    //     fill(255 - darkModeColor, 100);
+    //     rect(0, 0, width, height);
+    // }
+    background(255-darkModeColor);
+
+    if(darkMode) {
+        darkModeColor = lerp(darkModeColor, 215, 0.1);
     } else {
-        rectMode(CORNER);
-        fill(255, 100);
-        rect(0, 0, width, height);
+        darkModeColor = lerp(darkModeColor, 0, 0.1);
     }
 
-    fill(0);
+    fill(0 + darkModeColor);
     noStroke();
     textFont(font);
     textSize(tileSize / 2 + scorePulse);
@@ -133,6 +163,10 @@ function draw() {
     noFill();
     rectMode(CENTER);
     // rect(width / 2, height / 2, tileSize * 5, tileSize * 5, tileSize / 4);
+
+    buttons.forEach(button => {
+        button.show();
+    });
 
     for (let r = 0; r < boardSize; r++) {
         for (let c = 0; c < boardSize; c++) {
@@ -236,14 +270,17 @@ function touchStarted() {
         popup.onClick();
         return false;
     }
-    if (moves <= 0) {
-        popup = new Popup("gameover");
-        return false;
-    }
+    buttons.forEach(button => {
+        button.update();
+    });
+
     selectedRow = parseInt((mouseY - height / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
     selectedCol = parseInt((mouseX - width / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
-    fill(255);
     if (selectedRow >= 0 && selectedRow < boardSize && selectedCol >= 0 && selectedCol < boardSize) {
+        if (moves <= 0) {
+            popup = new Popup("gameover");
+            return false;
+        }
         if (touchStartX == -1 && touchStartY == -1) {
             touchStartX = mouseX;
             touchStartY = mouseY;
@@ -344,12 +381,4 @@ function scoreWord(str) {
 }
 
 function keyPressed() {
-    if (key == ' ') {
-        popup = new Popup("settings");
-    }
-    if (key == '1') {
-        boardSize = 4;
-        preload();
-        setup();
-    }
 }

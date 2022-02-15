@@ -23,14 +23,14 @@ function Tile(r, c, s) {
         // fill(130);
 
         if (this.highlightDur > 0) {
-            fill(130, 130 + this.highlightDur, 130);
+            fill(130 - darkModeColor/3, 130 + this.highlightDur - darkModeColor/3, 130 - darkModeColor/3);
             this.highlightDur -= 3;
         } else {
-            fill(130);
+            fill(130 - darkModeColor/3);
         }
 
         rect(this.x, this.y, tileSize * 9 / 10, tileSize * 9 / 10, tileSize / 5);
-        fill(255);
+        fill(255 - darkModeColor/4);
         noStroke();
         text(this.s, this.x, this.y);
     }

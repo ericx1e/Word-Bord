@@ -10,10 +10,10 @@ function Popup(id) {
 
     if (id == "settings") {
         this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, -this.h / 4, "dark mode"));
-        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, -this.h / 8, "dark mode"));
-        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, 0, "dark mode"));
-        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 8, "dark mode"));
-        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 4, "dark mode"));
+        this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, -this.h / 8, "board size"));
+        // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, 0, "dark mode"));
+        // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 8, "dark mode"));
+        // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 4, "dark mode"));
     }
 
     this.show = function () {
@@ -36,17 +36,17 @@ function Popup(id) {
         rectMode(CENTER);
         noStroke();
         for (let i = 50; i > 0; i--) {
-            fill(205 + i, 5);
+            fill(205 + i - darkModeColor, 5);
             rect(this.x, this.y, this.w + i, this.h + i, (this.w + i) / 20);
         }
-        fill(255);
+        fill(255 - darkModeColor);
         rect(this.x, this.y, this.w, this.h, this.w / 20);
 
         textAlign(CENTER, CENTER);
         textSize(this.w / 24);
         textFont(font);
         textWrap(WORD);
-        fill(0);
+        fill(0 + darkModeColor);
 
         switch (id) {
             case "welcome":

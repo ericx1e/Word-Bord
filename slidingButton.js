@@ -12,6 +12,9 @@ function SlidingButton(x, y, w, offset, id) {
         case "dark mode":
             this.toggle = darkMode;
             break;
+        case "board size":
+            this.toggle = (boardSize == 5);
+            break;
     }
 
     this.show = function () {
@@ -21,23 +24,33 @@ function SlidingButton(x, y, w, offset, id) {
             case "dark mode":
                 tx = "Dark mode";
                 break;
+            case "board size":
+                tx = "Board Size";
+                break;
         }
 
-        fill(0);
+        fill(0 + darkModeColor);
         textSize(this.h / 1.5);
         text(tx, this.x - this.fullW * 12.5 / 16, this.y);
 
         rectMode(CENTER);
         noStroke();
-        fill(this.color);
+        fill(this.color - darkModeColor/2);
         rect(this.x, this.y, this.w, this.h, this.h / 2);
-        fill(this.color / 2);
+        fill(this.color / 2 - darkModeColor/4);
         ellipse(this.buttonX, this.y, this.h * 9 / 10, this.h * 9 / 10);
 
         fill(255);
         textAlign(CENTER, CENTER);
         textSize(this.h / 3);
-        text(this.toggle ? "ON" : "OFF", this.buttonX, this.y);
+        switch (id) {
+            case "dark mode":
+                text(this.toggle ? "ON" : "OFF", this.buttonX, this.y);
+                break;
+            case "board size":
+                text(this.toggle ? "5" : "4", this.buttonX, this.y);
+                break;
+        }
 
     }
 
@@ -53,12 +66,29 @@ function SlidingButton(x, y, w, offset, id) {
             case "dark mode":
                 darkMode = this.toggle;
                 break;
+            case "board size":
+                boardSize = this.toggle ? 5 : 4;
+                break;
         }
     }
 
     this.click = function () {
         if (this.touchingMouse()) {
             this.toggle = !this.toggle;
+            if(id == "board size") {
+                this.update();
+                boardCreated = false;
+                board = [];
+                rot = 0; //how much we've rotated a rot or col
+                dict;
+                boards;
+                wordsFound = [];
+                score = 0;
+                moves = 50;
+                preload();
+                setup();
+                popup.closing = true;
+            }
         }
     }
 
