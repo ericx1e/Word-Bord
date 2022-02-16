@@ -1,4 +1,5 @@
 let boardSize = 5;
+const API_URL = "http://ec2-18-208-144-154.compute-1.amazonaws.com/api/v1";
 
 let firstLoad = true;
 
@@ -33,37 +34,21 @@ function preload() {
 
 function createBoard() {
     tileSize = height / 18 + width / 36 * 5 / 5;
-    let dayIndex = day() + (year() - 2022) * 365; //basically day of tne year for the next two years
-    for (let i = 0; i < month() - 1; i++) {
-        dayIndex += days2022[i];
-    }
-    //generate five words and scramble
-    if (dayIndex >= boards.length) {
-        let words = [];
-
-        for (let i = 0; i < boardSize; i++) {
-            words[i] = dict[Math.floor(random(0, dict.length))].shuffle().toUpperCase();
-        }
-
+    fetch(`${API_URL}/board/${boardSize}`, {
+        method: 'GET'
+    }).then( response => response.json() ).then( data => {
+        // generate from API response
         for (let r = 0; r < boardSize; r++) {
             board[r] = [];
             for (let c = 0; c < boardSize; c++) {
-                board[r][c] = new Tile(r, c, words[r].split("")[c]);
+                board[r][c] = new Tile(r, c, data[r][c].toUpperCase());
             }
         }
-    } else {
-        //generate from file
-        for (let r = 0; r < boardSize; r++) {
-            board[r] = [];
-            for (let c = 0; c < boardSize; c++) {
-                board[r][c] = new Tile(r, c, boards[dayIndex * boardSize + r].split("")[c].toUpperCase());
-            }
-        }
-    }
 
-    checkWords();
-    boardCreated = true;
-    loop();
+        checkWords();
+        boardCreated = true;
+        loop();
+    })
 }
 
 function setup() {
@@ -76,7 +61,7 @@ function setup() {
     }
     noLoop();
     dict = loadStrings("dictionaries/words" + boardSize + ".txt");
-    boards = loadStrings("boards/boards" + boardSize + ".txt", createBoard);
+    createBoard()
     font = loadFont("Ubuntu/Ubuntu-Light.ttf");
     font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
     icons = loadFont("fa.otf");
