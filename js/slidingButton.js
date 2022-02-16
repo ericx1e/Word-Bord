@@ -79,12 +79,14 @@ function SlidingButton(x, y, w, offset, id) {
                 this.update();
                 boardCreated = false;
                 board = [];
+                buttons = [];
                 rot = 0; //how much we've rotated a rot or col
                 dict;
                 boards;
                 wordsFound = [];
                 score = 0;
                 moves = 50;
+                movesMade = [];
                 preload();
                 setup();
                 popup.closing = true;

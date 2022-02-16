@@ -9,6 +9,7 @@ let rot = 0; //how much we've rotated a rot or col
 let dict;
 let boards;
 let wordsFound = [];
+let movesMade = [];
 let score = 0;
 let scorePulse = 0;
 let movesPulse = 0;
@@ -81,6 +82,7 @@ function setup() {
     icons = loadFont("fa.otf");
 
     buttons.push(new Button(width - (width/30 + height/30), height - (width/30 + height/30), width/40, "settings"));
+    buttons.push(new Button(width - 2 * (width/30 + height/30), height - (width/30 + height/30), width/40, "undo"))
 
     // dayIndex = parseInt(random(0, 365*2));
     // console.log(dayIndex);
@@ -273,7 +275,6 @@ function touchStarted() {
     buttons.forEach(button => {
         button.update();
     });
-
     selectedRow = parseInt((mouseY - height / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
     selectedCol = parseInt((mouseX - width / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
     if (selectedRow >= 0 && selectedRow < boardSize && selectedCol >= 0 && selectedCol < boardSize) {
@@ -293,10 +294,15 @@ function touchEnded() {
     if (moves <= 0) {
         return false;
     }
-    checkWords();
+    let _found = checkWords();
     if (rot % boardSize != 0) {
         moves--;
         movesPulse = 3;
+        if(rotatingRows) {
+            movesMade.push({dir: "row", i: selectedRow, n: rot%5, found: _found});
+        } else {
+            movesMade.push({dir: "col", i: selectedCol, n: rot%5, found: _found});
+        }
     }
     touchStartX = -1;
     touchStartY = -1;
@@ -312,6 +318,7 @@ function touchMoved() {
 
 
 function checkWords() {
+    let result = [];
     for (let r = 0; r < boardSize; r++) {
         for (let c = 0; c < boardSize; c++) {
             board[r][c].highlight = false;
@@ -336,9 +343,11 @@ function checkWords() {
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             scoreWord(str);
+            result.push(str);
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             scoreWord(revStr);
+            result.push(revStr);
         }
     }
 
@@ -361,11 +370,14 @@ function checkWords() {
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             scoreWord(str);
+            result.push(str);
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             scoreWord(revStr);
+            result.push(revStr);
         }
     }
+    return result;
 }
 
 function scoreWord(str) {
@@ -381,4 +393,23 @@ function scoreWord(str) {
 }
 
 function keyPressed() {
+}
+
+function undo() {
+    console.log("wjat");
+    if(movesMade.length > 0) {
+        lastMove = movesMade.pop();
+        if(lastMove.dir == "row") {
+            rotateRow(lastMove.i, -lastMove.n);
+            moves++;
+        }
+        if(lastMove.dir == "col") {
+            rotateCol(lastMove.i, -lastMove.n);
+            moves++;
+        }
+        for(let i = 0; i < lastMove.found.length; i++) {
+            wordsFound.pop();
+            score-=100;
+        }
+    }
 }
