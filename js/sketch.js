@@ -69,6 +69,25 @@ function setup() {
     buttons.push(new Button(width - (width/30 + height/30), height - (width/30 + height/30), width/40, "settings"));
     buttons.push(new Button(width - 2 * (width/30 + height/30), height - (width/30 + height/30), width/40, "undo"))
 
+    fetch(`${API_URL}/leaderboard`, {
+        method: 'GET'
+    }).then( response => response.json() ).then( data => {
+        /*
+        On success:
+        [
+            {
+                name: NAME,
+                score: score
+            }
+        ]
+
+        On err:
+        {
+            err: "ASDF"
+        }
+        */
+    })
+
     // dayIndex = parseInt(random(0, 365*2));
     // console.log(dayIndex);
 
@@ -277,6 +296,32 @@ function touchStarted() {
 
 function touchEnded() {
     if (moves <= 0) {
+        fetch(`${API_URL}/leaderboard`, {
+            method: 'POST',
+            body: {
+                name: "TEST", // TODO: change this to a variable
+                score: score,
+                moves: movesMade
+            }
+        }).then( response => response.json() ).then( data => {
+            // do something with the data
+            /*
+            ON SUCCESS
+            {
+                name: "TEST",
+                score: 0
+            }
+
+            ON FAILURE
+            {
+                err: "ERROR MESSAGE"
+            }
+
+            if (data.err) // if it's not null
+                // ERROR HANDLING
+            else // display score
+            */
+        })
         return false;
     }
     let _found = checkWords();
