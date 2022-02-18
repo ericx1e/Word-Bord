@@ -5,7 +5,7 @@ let firstLoad = true;
 let tileSize;
 let board = [];
 let buttons = [];
-let rot = 0; //how much we've rotated a rot or col
+let rot = 0; //how much we'veg rotated a rot or col
 let dict;
 let boards;
 let wordsFound = [];
@@ -82,7 +82,8 @@ function setup() {
     icons = loadFont("fa.otf");
 
     buttons.push(new Button(width - (width/30 + height/30), height - (width/30 + height/30), width/40, "settings"));
-    buttons.push(new Button(width - 2 * (width/30 + height/30), height - (width/30 + height/30), width/40, "undo"))
+    buttons.push(new Button(width - 2 * (width/30 + height/30), height - (width/30 + height/30), width/40, "undo"));
+    buttons.push(new Button(width - 3 * (width/30 + height/30), height - (width/30 + height/30), width/40, "reset"));
 
     // dayIndex = parseInt(random(0, 365*2));
     // console.log(dayIndex);
@@ -195,8 +196,8 @@ function draw() {
 
 
 
-
-    // text("fps: " + Math.floor(frameRate()), width / 2, height / 8);
+    fill(0);
+    text("fps " + Math.floor(frameRate()), width / 8, height / 8);
 
     // for(let i = 0; i < fadingTexts.length; i++) {
     //     fadingTexts[0].show();
@@ -396,7 +397,6 @@ function keyPressed() {
 }
 
 function undo() {
-    console.log("wjat");
     if(movesMade.length > 0) {
         lastMove = movesMade.pop();
         if(lastMove.dir == "row") {
@@ -411,5 +411,12 @@ function undo() {
             wordsFound.pop();
             score-=100;
         }
+    }
+}
+
+function reset() {
+    for(let i = 0; i < movesMade.length; i++) {
+        undo();
+        i--;
     }
 }
