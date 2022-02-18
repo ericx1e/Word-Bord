@@ -1,5 +1,6 @@
 let boardSize = 5;
-const API_URL = "http://ec2-18-208-144-154.compute-1.amazonaws.com/api/v1";
+const API_URL = "https://word-bord-api.herokuapp.com/api/v1";
+
 
 let firstLoad = true;
 
