@@ -1,9 +1,15 @@
+let boardSize = 5;
+
+let firstLoad = true;
+
 let tileSize;
 let board = [];
+let buttons = [];
 let rot = 0; //how much we've rotated a rot or col
 let dict;
 let boards;
 let wordsFound = [];
+let movesMade = [];
 let score = 0;
 let scorePulse = 0;
 let movesPulse = 0;
@@ -14,24 +20,70 @@ let rotatingCols = false;
 let isPopup = false;
 let popup;
 let days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+let boardCreated = false;
+// let screenFade = 0;
+// let fa;
+
+//settings
+let darkMode = false;
+let darkModeColor = 0;
 
 function preload() {
-    dict = loadStrings("words.txt");
-    boards = loadStrings("boards.txt");
-    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
-    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
+}
+
+function createBoard() {
+    tileSize = height / 18 + width / 36 * 5 / 5;
+    let dayIndex = day() + (year() - 2022) * 365; //basically day of tne year for the next two years
+    for (let i = 0; i < month() - 1; i++) {
+        dayIndex += days2022[i];
+    }
+    //generate five words and scramble
+    if (dayIndex >= boards.length) {
+        let words = [];
+
+        for (let i = 0; i < boardSize; i++) {
+            words[i] = dict[Math.floor(random(0, dict.length))].shuffle().toUpperCase();
+        }
+
+        for (let r = 0; r < boardSize; r++) {
+            board[r] = [];
+            for (let c = 0; c < boardSize; c++) {
+                board[r][c] = new Tile(r, c, words[r].split("")[c]);
+            }
+        }
+    } else {
+        //generate from file
+        for (let r = 0; r < boardSize; r++) {
+            board[r] = [];
+            for (let c = 0; c < boardSize; c++) {
+                board[r][c] = new Tile(r, c, boards[dayIndex * boardSize + r].split("")[c].toUpperCase());
+            }
+        }
+    }
+
+    checkWords();
+    boardCreated = true;
+    loop();
 }
 
 function setup() {
+    boardCreated = false;
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
-    popup = new Popup("welcome");
-    tileSize = height / 18 + width / 36;
-
-    let dayIndex = day() + (year() - 2022) * 365; //basically day of tne year for the next two years
-    for(let i = 0; i < month() - 1; i++) {
-        dayIndex += days2022[i];
+    if(firstLoad) {
+        popup = new Popup("welcome");
+        firstLoad = false;
     }
+    noLoop();
+    dict = loadStrings("dictionaries/words" + boardSize + ".txt");
+    boards = loadStrings("boards/boards" + boardSize + ".txt", createBoard);
+    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
+    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
+    icons = loadFont("fa.otf");
+
+    buttons.push(new Button(width - (width/30 + height/30), height - (width/30 + height/30), width/40, "settings"));
+    buttons.push(new Button(width - 2 * (width/30 + height/30), height - (width/30 + height/30), width/40, "undo"))
+
     // dayIndex = parseInt(random(0, 365*2));
     // console.log(dayIndex);
 
@@ -43,32 +95,6 @@ function setup() {
     //         board[r][c] = String.fromCharCode(parseInt(random(65, 91)));
     //     }
     // }
-
-    //generate five words and scramble
-    if(dayIndex >= boards.length) {
-        let words = [];
-    
-        for (let i = 0; i < 5; i++) {
-            words[i] = dict[Math.floor(random(0, dict.length))].shuffle().toUpperCase();
-        }
-    
-        for (let r = 0; r < 5; r++) {
-            board[r] = [];
-            for (let c = 0; c < 5; c++) {
-                board[r][c] = new Tile(r, c, words[r].split("")[c]);
-            }
-        }
-    } else {
-        //generate from file
-        for(let r = 0; r < 5; r++) {
-            board[r] = [];
-            for(let c = 0; c < 5; c++) {
-                board[r][c] = new Tile(r, c, boards[dayIndex * 5 + r].split("")[c].toUpperCase());
-            }
-        }
-    }
-
-    checkWords();
 }
 
 String.prototype.shuffle = function () {
@@ -85,23 +111,47 @@ String.prototype.shuffle = function () {
 }
 
 function draw() {
-    // background(255);
-    rectMode(CORNER);
-    fill(255, 100);
-    rect(0, 0, width, height);
+    if (!boardCreated) {
+        // background(255);
+        // textSize(100);
+        // fill(0);
+        // noStroke();
+        // textAlign(CENTER, CENTER);
+        // text("LOADING", width/2, height/2);
 
-    fill(0);
+        return;
+    }
+    // if(board[0][0] == undefined) {
+    //     return;
+    // }
+
+    // if (isPopup) {
+    //     background(255 - darkModeColor);
+    // } else {
+    //     rectMode(CORNER);
+    //     fill(255 - darkModeColor, 100);
+    //     rect(0, 0, width, height);
+    // }
+    background(255-darkModeColor);
+
+    if(darkMode) {
+        darkModeColor = lerp(darkModeColor, 215, 0.1);
+    } else {
+        darkModeColor = lerp(darkModeColor, 0, 0.1);
+    }
+
+    fill(0 + darkModeColor);
     noStroke();
     textFont(font);
     textSize(tileSize / 2 + scorePulse);
     if (scorePulse > 0) {
-        scorePulse-=0.7;
+        scorePulse -= 0.7;
     }
     textAlign(CENTER, CENTER);
     text("SCORE: " + score, width / 2, height * 13.5 / 16);
     textSize(tileSize / 2 + movesPulse);
     if (movesPulse > 0) {
-        movesPulse-=0.5;
+        movesPulse -= 0.5;
     }
     textAlign(CENTER, CENTER);
     text("MOVES: " + moves, width / 2, height * 15 / 16);
@@ -116,8 +166,12 @@ function draw() {
     rectMode(CENTER);
     // rect(width / 2, height / 2, tileSize * 5, tileSize * 5, tileSize / 4);
 
-    for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 5; c++) {
+    buttons.forEach(button => {
+        button.show();
+    });
+
+    for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
             board[r][c].show();
             board[r][c].update();
         }
@@ -171,18 +225,18 @@ function draw() {
 
 function rotateRow(row, n) {
     // let dir = n / Math.abs(n);
-    n %= 5;
+    n %= boardSize;
     newRow = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < boardSize; i++) {
         let c = i - n;
         if (c < 0) {
-            c += 5;
+            c += boardSize;
         }
-        c %= 5;
+        c %= boardSize;
         // newRow[i] = board[row][c];
         newRow[i] = board[row][c];
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < boardSize; i++) {
         board[row][i] = newRow[i];
         board[row][i].move(row, i);
     }
@@ -191,17 +245,17 @@ function rotateRow(row, n) {
 
 function rotateCol(col, n) {
     // let dir = n / Math.abs(n);
-    n %= 5;
+    n %= boardSize;
     newCol = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < boardSize; i++) {
         let r = i - n;
         if (r < 0) {
-            r += 5;
+            r += boardSize;
         }
-        r %= 5;
+        r %= boardSize;
         newCol[i] = board[r][col];
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < boardSize; i++) {
         board[i][col] = newCol[i];
         board[i][col].move(i, col);
     }
@@ -218,14 +272,16 @@ function touchStarted() {
         popup.onClick();
         return false;
     }
-    if(moves <= 0) {
-        popup = new Popup("gameover");
-        return false;
-    }
-    selectedRow = parseInt((mouseY - height / 2 + tileSize * 2 + tileSize / 2) / tileSize);
-    selectedCol = parseInt((mouseX - width / 2 + tileSize * 2 + tileSize / 2) / tileSize);
-    fill(255);
-    if (selectedRow >= 0 && selectedRow < 5 && selectedCol >= 0 && selectedCol < 5) {
+    buttons.forEach(button => {
+        button.update();
+    });
+    selectedRow = parseInt((mouseY - height / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
+    selectedCol = parseInt((mouseX - width / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
+    if (selectedRow >= 0 && selectedRow < boardSize && selectedCol >= 0 && selectedCol < boardSize) {
+        if (moves <= 0) {
+            popup = new Popup("gameover");
+            return false;
+        }
         if (touchStartX == -1 && touchStartY == -1) {
             touchStartX = mouseX;
             touchStartY = mouseY;
@@ -235,13 +291,18 @@ function touchStarted() {
 }
 
 function touchEnded() {
-    if(moves <= 0) {
+    if (moves <= 0) {
         return false;
     }
-    checkWords();
-    if (rot % 5 != 0) {
+    let _found = checkWords();
+    if (rot % boardSize != 0) {
         moves--;
         movesPulse = 3;
+        if(rotatingRows) {
+            movesMade.push({dir: "row", i: selectedRow, n: rot%5, found: _found});
+        } else {
+            movesMade.push({dir: "col", i: selectedCol, n: rot%5, found: _found});
+        }
     }
     touchStartX = -1;
     touchStartY = -1;
@@ -257,21 +318,22 @@ function touchMoved() {
 
 
 function checkWords() {
-    for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 5; c++) {
+    let result = [];
+    for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
             board[r][c].highlight = false;
         }
     }
-    for (let r = 0; r < 5; r++) {
+    for (let r = 0; r < boardSize; r++) {
         let str = "";
         let revStr = "";
-        for (let c = 0; c < 5; c++) {
+        for (let c = 0; c < boardSize; c++) {
             str += board[r][c].s;
-            revStr += board[r][4 - c].s;
+            revStr += board[r][boardSize - 1 - c].s;
         }
         str = str.toLowerCase();
         revStr = revStr.toLowerCase();
-        for (let c = 0; c < 5; c++) {
+        for (let c = 0; c < boardSize; c++) {
             if (dict.includes(str) && !wordsFound.includes(str)) {
                 board[r][c].highlightDur = 180;
             }
@@ -281,22 +343,24 @@ function checkWords() {
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             scoreWord(str);
+            result.push(str);
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             scoreWord(revStr);
+            result.push(revStr);
         }
     }
 
-    for (let c = 0; c < 5; c++) {
+    for (let c = 0; c < boardSize; c++) {
         let str = "";
         let revStr = "";
-        for (let r = 0; r < 5; r++) {
+        for (let r = 0; r < boardSize; r++) {
             str += board[r][c].s;
-            revStr += board[4 - r][c].s;
+            revStr += board[boardSize - 1 - r][c].s;
         }
         str = str.toLowerCase();
         revStr = revStr.toLowerCase();
-        for (let r = 0; r < 5; r++) {
+        for (let r = 0; r < boardSize; r++) {
             if (dict.includes(str) && !wordsFound.includes(str)) {
                 board[r][c].highlightDur = 180;
             }
@@ -306,11 +370,14 @@ function checkWords() {
         }
         if (dict.includes(str) && !wordsFound.includes(str)) {
             scoreWord(str);
+            result.push(str);
         }
         if (dict.includes(revStr) && !wordsFound.includes(revStr)) {
             scoreWord(revStr);
+            result.push(revStr);
         }
     }
+    return result;
 }
 
 function scoreWord(str) {
@@ -322,5 +389,27 @@ function scoreWord(str) {
         fadingTexts.push(new FadingText(width / 4, height / 2, str.toUpperCase()));
     } else {
         fadingTexts.push(new FadingText(width / 2, height / 4, str.toUpperCase()));
+    }
+}
+
+function keyPressed() {
+}
+
+function undo() {
+    console.log("wjat");
+    if(movesMade.length > 0) {
+        lastMove = movesMade.pop();
+        if(lastMove.dir == "row") {
+            rotateRow(lastMove.i, -lastMove.n);
+            moves++;
+        }
+        if(lastMove.dir == "col") {
+            rotateCol(lastMove.i, -lastMove.n);
+            moves++;
+        }
+        for(let i = 0; i < lastMove.found.length; i++) {
+            wordsFound.pop();
+            score-=100;
+        }
     }
 }

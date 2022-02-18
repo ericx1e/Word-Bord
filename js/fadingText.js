@@ -5,7 +5,7 @@ function FadingText(x, y, s) {
     this.s = s;
 
     this.show = function () {
-        fill(50, this.life);
+        fill(50 + darkModeColor, this.life);
         noStroke();
         textSize(height / 50 + width / 50);
         textFont(font2);
