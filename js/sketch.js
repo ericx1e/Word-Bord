@@ -67,9 +67,9 @@ function setup() {
     font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
     icons = loadFont("fa.otf");
 
-    buttons.push(new Button(width - (width/30 + height/30), height - (width/30 + height/30), width/40, "settings"));
-    buttons.push(new Button(width - 2 * (width/30 + height/30), height - (width/30 + height/30), width/40, "undo"));
-    buttons.push(new Button(width - 3 * (width/30 + height/30), height - (width/30 + height/30), width/40, "reset"));
+    buttons.push(new Button(width - (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "settings"));
+    buttons.push(new Button(width - 2 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "undo"));
+    buttons.push(new Button(width - 3 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "reset"));
 
     fetch(`${API_URL}/leaderboard`, {
         method: 'GET'
@@ -210,7 +210,7 @@ function draw() {
 
 
     fill(0);
-    text("fps " + Math.floor(frameRate()), width / 8, height / 8);
+    // text("fps " + Math.floor(frameRate()), width / 8, height / 8);
 
     // for(let i = 0; i < fadingTexts.length; i++) {
     //     fadingTexts[0].show();
@@ -306,41 +306,41 @@ function touchStarted() {
 
 function touchEnded() {
     if (moves <= 0) {
-        fetch(`${API_URL}/leaderboard`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                name: "TEST", // TODO: change this to a variable
-                score: score,
-                boardSize: boardSize,
-                moves: movesMade
-            })
-        }).then(response => response.json()).then(data => {
-            // do something with the data
-            /*
-            ON SUCCESS
-            {
-                name: "TEST",
-                score: 0
-            }
+        // fetch(`${API_URL}/leaderboard`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify({
+        //         name: "TEST", // TODO: change this to a variable
+        //         score: score,
+        //         boardSize: boardSize,
+        //         moves: movesMade
+        //     })
+        // }).then(response => response.json()).then(data => {
+        //     // do something with the data
+        //     /*
+        //     ON SUCCESS
+        //     {
+        //         name: "TEST",
+        //         score: 0
+        //     }
 
-            ON FAILURE
-            {
-                err: "ERROR MESSAGE"
-            }
+        //     ON FAILURE
+        //     {
+        //         err: "ERROR MESSAGE"
+        //     }
 
-            if (data.err) // if it's not null
-                // ERROR HANDLING
-            else // display score
-            */
-            if (data.err) {
-                console.log(data.err);
-            } else {
-                console.log("neet");
-            }
-        })
+        //     if (data.err) // if it's not null
+        //         // ERROR HANDLING
+        //     else // display score
+        //     */
+        //     if (data.err) {
+        //         console.log(data.err);
+        //     } else {
+        //         console.log("neet");
+        //     }
+        // })
         return false;
     }
     let _found = checkWords();
@@ -445,7 +445,7 @@ function keyPressed() {
 }
 
 function undo() {
-    if(movesMade.length > 0) {
+    if (movesMade.length > 0) {
         lastMove = movesMade.pop();
         if (lastMove.dir == "row") {
             rotateRow(lastMove.i, -lastMove.n);
@@ -463,7 +463,7 @@ function undo() {
 }
 
 function reset() {
-    for(let i = 0; i < movesMade.length; i++) {
+    for (let i = 0; i < movesMade.length; i++) {
         undo();
         i--;
     }
