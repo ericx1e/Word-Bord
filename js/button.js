@@ -26,6 +26,14 @@ function Button(x, y, s, id) {
                 textSize(this.w + this.pulse);
                 text('\uf0e2', this.x, this.y);
                 break;
+            case "reset":
+                noStroke();
+                fill(0 + darkModeColor);
+                textFont(icons);
+                textAlign(CENTER, CENTER);
+                textSize(this.w + this.pulse);
+                text('\uf021', this.x, this.y);
+                break;
         }
         if(this.pulse > 0) {
             this.pulse--;
@@ -42,6 +50,9 @@ function Button(x, y, s, id) {
                     break;
                 case "undo":
                     undo();
+                    break;
+                case "reset":
+                    reset();
                     break;
             }
         }
