@@ -1,5 +1,6 @@
 let boardSize = 5;
-const API_URL = "http://ec2-18-208-144-154.compute-1.amazonaws.com/api/v1";
+const API_URL = "https://word-bord-api.herokuapp.com/api/v1";
+
 
 let firstLoad = true;
 
@@ -36,7 +37,7 @@ function createBoard() {
     tileSize = height / 18 + width / 36 * 5 / 5;
     fetch(`${API_URL}/board/${boardSize}`, {
         method: 'GET'
-    }).then( response => response.json() ).then( data => {
+    }).then(response => response.json()).then(data => {
         // generate from API response
         for (let r = 0; r < boardSize; r++) {
             board[r] = [];
@@ -55,7 +56,7 @@ function setup() {
     boardCreated = false;
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
-    if(firstLoad) {
+    if (firstLoad) {
         popup = new Popup("welcome");
         firstLoad = false;
     }
@@ -72,7 +73,8 @@ function setup() {
 
     fetch(`${API_URL}/leaderboard`, {
         method: 'GET'
-    }).then( response => response.json() ).then( data => {
+    }).then(response => response.json()).then(data => {
+        console.log(data.length);
         /*
         On success:
         [
@@ -87,6 +89,13 @@ function setup() {
             err: "ASDF"
         }
         */
+
+
+        if (data.err) {
+            console.log(data.err);
+        } else {
+            console.log(data.name);
+        }
     })
 
     // dayIndex = parseInt(random(0, 365*2));
@@ -137,9 +146,9 @@ function draw() {
     //     fill(255 - darkModeColor, 100);
     //     rect(0, 0, width, height);
     // }
-    background(255-darkModeColor);
+    background(255 - darkModeColor);
 
-    if(darkMode) {
+    if (darkMode) {
         darkModeColor = lerp(darkModeColor, 215, 0.1);
     } else {
         darkModeColor = lerp(darkModeColor, 0, 0.1);
@@ -299,12 +308,16 @@ function touchEnded() {
     if (moves <= 0) {
         fetch(`${API_URL}/leaderboard`, {
             method: 'POST',
-            body: {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
                 name: "TEST", // TODO: change this to a variable
                 score: score,
+                boardSize: boardSize,
                 moves: movesMade
-            }
-        }).then( response => response.json() ).then( data => {
+            })
+        }).then(response => response.json()).then(data => {
             // do something with the data
             /*
             ON SUCCESS
@@ -322,6 +335,11 @@ function touchEnded() {
                 // ERROR HANDLING
             else // display score
             */
+            if (data.err) {
+                console.log(data.err);
+            } else {
+                console.log("neet");
+            }
         })
         return false;
     }
@@ -329,10 +347,10 @@ function touchEnded() {
     if (rot % boardSize != 0) {
         moves--;
         movesPulse = 3;
-        if(rotatingRows) {
-            movesMade.push({dir: "row", i: selectedRow, n: rot%5, found: _found});
+        if (rotatingRows) {
+            movesMade.push({ dir: "row", i: selectedRow, n: rot % 5, found: _found });
         } else {
-            movesMade.push({dir: "col", i: selectedCol, n: rot%5, found: _found});
+            movesMade.push({ dir: "col", i: selectedCol, n: rot % 5, found: _found });
         }
     }
     touchStartX = -1;
@@ -429,17 +447,17 @@ function keyPressed() {
 function undo() {
     if(movesMade.length > 0) {
         lastMove = movesMade.pop();
-        if(lastMove.dir == "row") {
+        if (lastMove.dir == "row") {
             rotateRow(lastMove.i, -lastMove.n);
             moves++;
         }
-        if(lastMove.dir == "col") {
+        if (lastMove.dir == "col") {
             rotateCol(lastMove.i, -lastMove.n);
             moves++;
         }
-        for(let i = 0; i < lastMove.found.length; i++) {
+        for (let i = 0; i < lastMove.found.length; i++) {
             wordsFound.pop();
-            score-=100;
+            score -= 100;
         }
     }
 }
