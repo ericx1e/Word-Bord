@@ -35,9 +35,9 @@ function SlidingButton(x, y, w, offset, id) {
 
         rectMode(CENTER);
         noStroke();
-        fill(this.color - darkModeColor/2);
+        fill(this.color - darkModeColor / 2);
         rect(this.x, this.y, this.w, this.h, this.h / 2);
-        fill(this.color / 2 - darkModeColor/4);
+        fill(this.color / 2 - darkModeColor / 4);
         ellipse(this.buttonX, this.y, this.h * 9 / 10, this.h * 9 / 10);
 
         fill(255);
@@ -75,7 +75,7 @@ function SlidingButton(x, y, w, offset, id) {
     this.click = function () {
         if (this.touchingMouse()) {
             this.toggle = !this.toggle;
-            if(id == "board size") {
+            if (id == "board size") {
                 this.update();
                 boardCreated = false;
                 board = [];
@@ -85,7 +85,7 @@ function SlidingButton(x, y, w, offset, id) {
                 boards;
                 wordsFound = [];
                 score = 0;
-                moves = 50;
+                moves = 20;
                 movesMade = [];
                 preload();
                 setup();

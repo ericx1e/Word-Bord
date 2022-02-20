@@ -50,7 +50,7 @@ function Popup(id) {
 
         switch (id) {
             case "welcome":
-                text("Welcome to Word Bord!\n\n\nClick and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nScore as many points as possible in 50 moves\n\nCome back every day for a new Word Bord!\n\n\n\nMade by Eric Xie", this.x, this.y - this.h / 2.4, this.w * 9 / 10);
+                text("Welcome to Word Bord!\n\n\nClick and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nScore as many points as possible in 20 moves\n\nCome back every day for a new Word Bord!\n\n\n\nMade by Eric Xie", this.x, this.y - this.h / 2.4, this.w * 9 / 10);
                 break;
             case "gameover":
                 text("Out of moves!\n\n\nYou scored " + score + " points \n\nReload the page to try again or come back tomorrow for a new Word Bord", this.x, this.y - this.h / 4, this.w * 9 / 10);
@@ -66,7 +66,7 @@ function Popup(id) {
         });
 
         push();
-        stroke(0+darkModeColor);
+        stroke(0 + darkModeColor);
         strokeWeight(1);
         translate(this.x + this.w * 7 / 16, this.y - this.h * 7 / 16);
         line(-this.lineLen, -this.lineLen, this.lineLen, this.lineLen);

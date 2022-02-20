@@ -6,7 +6,7 @@ function Button(x, y, s, id) {
     this.id = id;
     this.pulse = 0;
 
-    this.show = function() {
+    this.show = function () {
         switch (id) {
             case "settings":
                 noStroke();
@@ -34,8 +34,16 @@ function Button(x, y, s, id) {
                 textSize(this.w + this.pulse);
                 text('\uf021', this.x, this.y);
                 break;
+            case "info":
+                noStroke();
+                fill(0 + darkModeColor);
+                textFont(icons);
+                textAlign(CENTER, CENTER);
+                textSize(this.w + this.pulse);
+                text('\uf129', this.x, this.y);
+                break;
         }
-        if(this.pulse > 0) {
+        if (this.pulse > 0) {
             this.pulse--;
         }
     }
@@ -43,8 +51,8 @@ function Button(x, y, s, id) {
 
     this.update = function () {
         if (this.touchingMouse()) {
-            this.pulse = this.w/3;
-            switch(id) {
+            this.pulse = this.w / 3;
+            switch (id) {
                 case "settings":
                     popup = new Popup("settings");
                     break;
@@ -53,6 +61,9 @@ function Button(x, y, s, id) {
                     break;
                 case "reset":
                     reset();
+                    break;
+                case "info":
+                    popup = new Popup("welcome");
                     break;
             }
         }

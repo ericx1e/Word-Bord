@@ -1,4 +1,4 @@
-let boardSize = 5;
+let boardSize = 4;
 const API_URL = "https://word-bord-api.herokuapp.com/api/v1";
 
 
@@ -16,7 +16,7 @@ let score = 0;
 let scorePulse = 0;
 let movesPulse = 0;
 let fadingTexts = [];
-let moves = 50;
+let moves = 20;
 let rotatingRows = false;
 let rotatingCols = false;
 let isPopup = false;
@@ -57,7 +57,7 @@ function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
     if (firstLoad) {
-        popup = new Popup("welcome");
+        // popup = new Popup("welcome");
         firstLoad = false;
     }
     noLoop();
@@ -67,6 +67,7 @@ function setup() {
     font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
     icons = loadFont("fa.otf");
 
+    buttons.push(new Button(width / 30 + height / 30, height - (width / 30 + height / 30), width / 40, "info"));
     buttons.push(new Button(width - (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "settings"));
     buttons.push(new Button(width - 2 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "undo"));
     buttons.push(new Button(width - 3 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "reset"));
