@@ -127,7 +127,7 @@ function Popup(id) {
         }
         if (id == "name" && !scoreSent) {
 
-            let name = prompt("Enter your name", "limit 6 characters");
+            let name = prompt("Enter your name (6 characters max)");
             fetch(`${API_URL}/leaderboard`, {
                 method: 'POST',
                 headers: {
@@ -160,7 +160,7 @@ function Popup(id) {
                 if (data.err) {
                     console.log(data.err);
                     if (data.err == "Error: Name not allowed.") {
-                        name = prompt("Invalid name", "limit 6 characters");
+                        name = prompt("Invalid name");
                     } else {
                         //invalid board so we just close everything lol
                         scoreSent = true;
