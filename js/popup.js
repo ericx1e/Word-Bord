@@ -7,6 +7,8 @@ function Popup(id) {
     this.lineLen = this.w / 80;
     this.closing = false;
     this.buttons = [];
+    this.data;
+    this.gotData = false;
 
     if (id == "settings") {
         this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, -this.h / 4, "dark mode"));
@@ -14,6 +16,34 @@ function Popup(id) {
         // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, 0, "dark mode"));
         // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 8, "dark mode"));
         // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 4, "dark mode"));
+    }
+    else if (id == "leaderboard") {
+        fetch(`${API_URL}/leaderboard`, {
+            method: 'GET'
+        }).then(response => response.json()).then(data => {
+            /*
+            On success:
+            [
+                {
+                    name: NAME,
+                    score: score
+                }
+            ]
+    
+            On err:
+            {
+                err: "ASDF"
+            }
+            */
+
+
+            if (data.err) {
+                console.log(data.err);
+            } else {
+                this.data = data;
+                this.gotData = true;
+            }
+        })
     }
 
     this.show = function () {
@@ -35,7 +65,7 @@ function Popup(id) {
 
         rectMode(CENTER);
         noStroke();
-        for (let i = 50; i > 0; i--) {
+        for (let i = this.w / 25; i > 0; i--) {
             fill(205 + i - darkModeColor, 5);
             rect(this.x, this.y, this.w + i, this.h + i, (this.w + i) / 20);
         }
@@ -50,13 +80,29 @@ function Popup(id) {
 
         switch (id) {
             case "welcome":
-                text("Welcome to Word Bord!\n\n\nClick and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nScore as many points as possible in 20 moves\n\nCome back every day for a new Word Bord!\n\n\n\nMade by Eric Xie", this.x, this.y - this.h / 2.4, this.w * 9 / 10);
+                text("Click and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nScore as many points as possible in 20 moves\n\nCome back every day for a new Word Bord!\n\n\n\nMade by Eric Xie", this.x, this.y - this.h / 3, this.w * 9 / 10);
                 break;
             case "gameover":
-                text("Out of moves!\n\n\nYou scored " + score + " points \n\nReload the page to try again or come back tomorrow for a new Word Bord", this.x, this.y - this.h / 4, this.w * 9 / 10);
+                text(`Out of moves!\n\n\nYou scored ${score} points \n\nRestart to try again or come back tomorrow for a new Word Bord`, this.x, this.y - this.h / 4, this.w * 9 / 10);
                 break;
             case "settings":
                 text("Settings", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
+                break;
+            case "leaderboard":
+                if (!this.gotData) {
+                    text("Error getting scores", this.x, this.y);
+                } else {
+                    text("Today's Top Scores", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
+                    for (let i = 0; i < this.data.length; i++) {
+                        textAlign(LEFT, CENTER);
+                        text(this.data[i].name, this.x - this.w * 9 / 20, this.y - this.h / 3 + this.h / 13 * i);
+                        textAlign(RIGHT, CENTER);
+                        text(this.data[i].score, this.x + this.w * 9 / 20, this.y - this.h / 3 + this.h / 13 * i);
+                    }
+                }
+                break;
+            case "name":
+                text("New High Score!\n\n\nClick to enter your name", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
                 break;
         }
 
@@ -77,6 +123,54 @@ function Popup(id) {
     this.onClick = function () {
         if (dist(this.x + this.w * 7 / 16, this.y - this.h * 7 / 16, mouseX, mouseY) < this.lineLen * 2) {
             this.closing = true;
+            return;
+        }
+        if (id == "name" && !scoreSent) {
+
+            let name = prompt("Enter your name", "limit 6 characters");
+            fetch(`${API_URL}/leaderboard`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name, // TODO: change this to a variable
+                    score: score,
+                    boardSize: boardSize,
+                    moves: movesMade
+                })
+            }).then(response => response.json()).then(data => {
+                // do something with the data
+                /*
+                ON SUCCESS
+                {
+                    name: "TEST",
+                    score: 0
+                }
+    
+                ON FAILURE
+                {
+                    err: "ERROR MESSAGE"
+                }
+    
+                if (data.err) // if it's not null
+                    // ERROR HANDLING
+                else // display score
+                */
+                if (data.err) {
+                    console.log(data.err);
+                    if (data.err == "Error: Name not allowed.") {
+                        name = prompt("Invalid name", "limit 6 characters");
+                    } else {
+                        //invalid board so we just close everything lol
+                        scoreSent = true;
+                        this.closing = true;
+                    }
+                } else {
+                    scoreSent = true;
+                    this.closing = true;
+                }
+            })
         }
         this.buttons.forEach(button => {
             button.click();

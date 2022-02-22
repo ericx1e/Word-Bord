@@ -23,6 +23,10 @@ let isPopup = false;
 let popup;
 let days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 let boardCreated = false;
+let scoreSent = false;
+let nameInputted = false;
+let minLeaderboardScore;
+let numLeaderboardScores;
 // let screenFade = 0;
 // let fa;
 
@@ -50,6 +54,35 @@ function createBoard() {
         boardCreated = true;
         loop();
     })
+
+    fetch(`${API_URL}/leaderboard`, {
+        method: 'GET'
+    }).then(response => response.json()).then(data => {
+        /*
+        On success:
+        [
+            {
+                name: NAME,
+                score: score
+            }
+        ]
+
+        On err:
+        {
+            err: "ASDF"
+        }
+        */
+
+
+        if (data.err) {
+            console.log(data.err);
+        } else {
+            numLeaderboardScores = data.length;
+            if (numLeaderboardScores > 0) {
+                minLeaderboardScore = data[data.length - 1].score;
+            }
+        }
+    })
 }
 
 function setup() {
@@ -71,33 +104,9 @@ function setup() {
     buttons.push(new Button(width - (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "settings"));
     buttons.push(new Button(width - 2 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "undo"));
     buttons.push(new Button(width - 3 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "reset"));
-
-    fetch(`${API_URL}/leaderboard`, {
-        method: 'GET'
-    }).then(response => response.json()).then(data => {
-        console.log(data.length);
-        /*
-        On success:
-        [
-            {
-                name: NAME,
-                score: score
-            }
-        ]
-
-        On err:
-        {
-            err: "ASDF"
-        }
-        */
+    buttons.push(new Button(width - 4 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "leaderboard"));
 
 
-        if (data.err) {
-            console.log(data.err);
-        } else {
-            console.log(data.name);
-        }
-    })
 
     // dayIndex = parseInt(random(0, 365*2));
     // console.log(dayIndex);
@@ -126,6 +135,7 @@ String.prototype.shuffle = function () {
 }
 
 function draw() {
+    // console.log(frameRate());
     if (!boardCreated) {
         // background(255);
         // textSize(100);
@@ -294,6 +304,12 @@ function touchStarted() {
     selectedCol = parseInt((mouseX - width / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
     if (selectedRow >= 0 && selectedRow < boardSize && selectedCol >= 0 && selectedCol < boardSize) {
         if (moves <= 0) {
+            if (!scoreSent) {
+                if (numLeaderboardScores < 10 || score > minLeaderboardScore) {
+                    popup = new Popup("name");
+                    return;
+                }
+            }
             popup = new Popup("gameover");
             return false;
         }
@@ -307,51 +323,16 @@ function touchStarted() {
 
 function touchEnded() {
     if (moves <= 0) {
-        // fetch(`${API_URL}/leaderboard`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({
-        //         name: "TEST", // TODO: change this to a variable
-        //         score: score,
-        //         boardSize: boardSize,
-        //         moves: movesMade
-        //     })
-        // }).then(response => response.json()).then(data => {
-        //     // do something with the data
-        //     /*
-        //     ON SUCCESS
-        //     {
-        //         name: "TEST",
-        //         score: 0
-        //     }
-
-        //     ON FAILURE
-        //     {
-        //         err: "ERROR MESSAGE"
-        //     }
-
-        //     if (data.err) // if it's not null
-        //         // ERROR HANDLING
-        //     else // display score
-        //     */
-        //     if (data.err) {
-        //         console.log(data.err);
-        //     } else {
-        //         console.log("neet");
-        //     }
-        // })
-        return false;
+        return;
     }
     let _found = checkWords();
     if (rot % boardSize != 0) {
         moves--;
         movesPulse = 3;
         if (rotatingRows) {
-            movesMade.push({ dir: "row", i: selectedRow, n: rot % 5, found: _found });
+            movesMade.push({ dir: "row", i: selectedRow, n: rot % boardSize, found: _found });
         } else {
-            movesMade.push({ dir: "col", i: selectedCol, n: rot % 5, found: _found });
+            movesMade.push({ dir: "col", i: selectedCol, n: rot % boardSize, found: _found });
         }
     }
     touchStartX = -1;
@@ -468,4 +449,6 @@ function reset() {
         undo();
         i--;
     }
+    scoreSent = false;
+    nameInputted = false;
 }
