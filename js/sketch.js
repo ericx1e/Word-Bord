@@ -1,9 +1,9 @@
-let boardSize = 4;
+const boardSize = 4;
 const API_URL = "https://word-bord-api.herokuapp.com/api/v1";
+const days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 
 let firstLoad = true;
-
 let tileSize;
 let board = [];
 let buttons = [];
@@ -21,7 +21,6 @@ let rotatingRows = false;
 let rotatingCols = false;
 let isPopup = false;
 let popup;
-let days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 let boardCreated = false;
 let scoreSent = false;
 let nameInputted = false;
@@ -34,7 +33,12 @@ let numLeaderboardScores;
 let darkMode = false;
 let darkModeColor = 0;
 
+let pointSound;
+let bigPointSound;
+
 function preload() {
+    pointSound = loadSound("sounds/mixkit-happy-bell-alert-601.wav");
+    bigPointSound = loadSound("sounds/mixkit-achievement-bell-600.wav");
 }
 
 function createBoard() {
@@ -334,6 +338,20 @@ function touchEnded() {
         } else {
             movesMade.push({ dir: "col", i: selectedCol, n: rot % boardSize, found: _found });
         }
+        // fetch(`${API_URL}/checkgame`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify({
+        //         name: 'buh',
+        //         score: score,
+        //         boardSize: boardSize,
+        //         moves: movesMade
+        //     })
+        // }).then(response => response.json()).then(data => {
+        //     console.log(data);
+        // })
     }
     touchStartX = -1;
     touchStartY = -1;
@@ -415,6 +433,11 @@ function scoreWord(str) {
     wordsFound.push(str);
     // fadingTexts.push(new FadingText(width / 2, height / 8, "+100"));
     score += 100;
+    if (score % 1000 == 0) {
+        bigPointSound.play();
+    } else {
+        pointSound.play();
+    }
     scorePulse = 8;
     if (width > height) {
         fadingTexts.push(new FadingText(width / 4, height / 2, str.toUpperCase()));
