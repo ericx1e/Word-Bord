@@ -134,7 +134,7 @@ function Popup(id) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name: name, // TODO: change this to a variable
+                    name: name,
                     score: score,
                     boardSize: boardSize,
                     moves: movesMade
