@@ -433,9 +433,9 @@ function scoreWord(str) {
     // fadingTexts.push(new FadingText(width / 2, height / 8, "+100"));
     score += 100;
     if (score % 1000 == 0) {
-        bigPointSound.play();
+        // bigPointSound.play();
     } else {
-        pointSound.play();
+        // pointSound.play();
     }
     scorePulse = 8;
     if (width > height) {
