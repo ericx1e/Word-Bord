@@ -1,8 +1,7 @@
-const boardSize = 4;
 const API_URL = "https://word-bord-api.herokuapp.com/api/v1";
 const days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-
+let boardSize = 4;
 let firstLoad = true;
 let tileSize;
 let board = [];
