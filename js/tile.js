@@ -17,7 +17,7 @@ function Tile(r, c, s) {
         } else {
             stroke(80);
         }
-        strokeWeight(3);
+        strokeWeight(tileSize/25);
 
         // rect(this.x, this.y, tileSize * 9.4 / 10, tileSize * 9.4 / 10, tileSize / 5);
         // fill(130);
@@ -29,7 +29,7 @@ function Tile(r, c, s) {
             fill(130 - darkModeColor/3);
         }
 
-        rect(this.x, this.y, tileSize * 9 / 10, tileSize * 9 / 10, tileSize / 5);
+        rect(this.x, this.y, tileSize * 9 / 10, tileSize * 9 / 10, tileSize / 6);
         fill(255 - darkModeColor/4);
         noStroke();
         text(this.s, this.x, this.y);

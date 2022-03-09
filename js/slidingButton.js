@@ -25,7 +25,7 @@ function SlidingButton(x, y, w, offset, id) {
                 tx = "Dark mode";
                 break;
             case "board size":
-                tx = "Board Size";
+                tx = "Bord Size";
                 break;
         }
 
@@ -90,6 +90,7 @@ function SlidingButton(x, y, w, offset, id) {
                 preload();
                 setup();
                 popup.closing = true;
+                scoreSent = false;
             }
         }
     }
