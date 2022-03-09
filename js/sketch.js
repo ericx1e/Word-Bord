@@ -8,7 +8,6 @@ let board = [];
 let buttons = [];
 let rot = 0; //how much we'veg rotated a rot or col
 let dict;
-let boards;
 let wordsFound = [];
 let movesMade = [];
 let score = 0;
@@ -32,6 +31,9 @@ let numLeaderboardScores;
 let darkMode = false;
 let darkModeColor = 0;
 
+let showFound = false;
+
+//sounds
 let pointSound;
 let bigPointSound;
 
@@ -88,6 +90,15 @@ function createBoard() {
     })
 }
 
+function windowResized() {
+    canvas = createCanvas(window.innerWidth, window.innerHeight);
+    canvas.position(0, 0);
+
+    tileSize = height / 18 + width / 36 * 5 / 5;
+
+    createButtons();
+}
+
 function setup() {
     boardCreated = false;
     canvas = createCanvas(window.innerWidth, window.innerHeight);
@@ -102,12 +113,8 @@ function setup() {
     font = loadFont("Ubuntu/Ubuntu-Light.ttf");
     font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
     icons = loadFont("fa.otf");
-
-    buttons.push(new Button(width / 30 + height / 30, height - (width / 30 + height / 30), width / 40, "info"));
-    buttons.push(new Button(width - (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "settings"));
-    buttons.push(new Button(width - 2 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "undo"));
-    buttons.push(new Button(width - 3 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "reset"));
-    buttons.push(new Button(width - 4 * (width / 30 + height / 30), height - (width / 30 + height / 30), width / 40, "leaderboard"));
+    
+    createButtons();
 
 
 
@@ -122,6 +129,28 @@ function setup() {
     //         board[r][c] = String.fromCharCode(parseInt(random(65, 91)));
     //     }
     // }
+}
+
+function createButtons() {
+    buttons = [];
+    
+    let shift = width / 30 + height / 30;
+    let size = shift/2;
+    if(width > height) {
+        buttons.push(new Button(shift, height - shift, size, "info"));
+        buttons.push(new Button(width - shift, height - shift, size, "settings"));
+        buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
+        buttons.push(new Button(width - 3 * shift, height - shift, size, "reset"));
+        buttons.push(new Button(width - 4 * shift, height - shift, size, "leaderboard"));
+    } else {
+        shift *= 1.15;
+        size *= 1.25;
+        buttons.push(new Button(shift, height - shift, size, "info"));
+        buttons.push(new Button(width - shift, height - shift, size, "settings"));
+        buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
+        buttons.push(new Button(width -  shift, height - 2 * shift, size, "reset"));
+        buttons.push(new Button(width - 2 * shift, height - 2 * shift, size, "leaderboard"));
+    }
 }
 
 String.prototype.shuffle = function () {
@@ -224,15 +253,6 @@ function draw() {
 
 
     fill(0);
-    // text("fps " + Math.floor(frameRate()), width / 8, height / 8);
-
-    // for(let i = 0; i < fadingTexts.length; i++) {
-    //     fadingTexts[0].show();
-    //     if(fadingText[0].life > 
-    //     if(fadingTexts[0].life < 0) {
-    //         fadingTexts.splice(0, 1);
-    //     }
-    // }
 
     for (let i = 0; i < fadingTexts.length; i++) {
         fadingTexts[i].show();
@@ -242,6 +262,21 @@ function draw() {
         if (fadingTexts[i].life < 0) {
             fadingTexts.splice(i, 1);
             i--;
+        }
+    }
+
+    if(showFound) {
+        fill(0);
+        textAlign(CENTER, TOP);
+        let size = width/40;
+        textFont(font);
+        textSize(size);
+        strokeWeight(size/20);
+        stroke(0);
+        text("Found:", width - width/6, height/6 - size);
+        noStroke();
+        for(let i = 0; i < wordsFound.length; i++) {
+            text(wordsFound[i], width - width/6, height/6 + i * size);
         }
     }
 

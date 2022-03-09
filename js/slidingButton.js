@@ -15,6 +15,9 @@ function SlidingButton(x, y, w, offset, id) {
         case "board size":
             this.toggle = (boardSize == 5);
             break;
+        case "show found":
+            this.toggle = showFound;
+            break;
     }
 
     this.show = function () {
@@ -26,6 +29,9 @@ function SlidingButton(x, y, w, offset, id) {
                 break;
             case "board size":
                 tx = "Bord Size";
+                break;
+            case "show found":
+                tx = "Show Found Words";
                 break;
         }
 
@@ -50,6 +56,9 @@ function SlidingButton(x, y, w, offset, id) {
             case "board size":
                 text(this.toggle ? "5" : "4", this.buttonX, this.y);
                 break;
+            case "show found":
+                text(this.toggle ? "ON" : "OFF", this.buttonX, this.y);
+                break;
         }
 
     }
@@ -68,6 +77,9 @@ function SlidingButton(x, y, w, offset, id) {
                 break;
             case "board size":
                 boardSize = this.toggle ? 5 : 4;
+                break;
+            case "show found":
+                showFound = this.toggle;
                 break;
         }
     }
