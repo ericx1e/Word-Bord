@@ -94,7 +94,6 @@ function SlidingButton(x, y, w, offset, id) {
                 buttons = [];
                 rot = 0; //how much we've rotated a rot or col
                 dict;
-                boards;
                 wordsFound = [];
                 score = 0;
                 moves = 20;
