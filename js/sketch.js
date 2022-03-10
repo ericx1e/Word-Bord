@@ -268,13 +268,15 @@ function draw() {
     if(showFound && width > height) { //no good way to list words on small windows and mobile
         fill(darkModeColor);
         textAlign(CENTER, TOP);
-        let size = width/80 + height/50;
+        let size = width/50 + height/50;
         textFont(font);
         textSize(size);
-        strokeWeight(size/20); //stroke for a bold effect
+        strokeWeight(size/30); //stroke for a bold effect
         stroke(darkModeColor);
         text("Found:", width - width/7, height/9 - size);
         noStroke();
+        size -= wordsFound.length / 2.3;
+        textSize(size);
         for(let i = 0; i < wordsFound.length; i++) {
             //writes two words per row
             text(wordsFound[i], width  - width/7 - 1.5 * size + 3 * size*(i % 2), height/9 + Math.floor(i / 2) * size);
