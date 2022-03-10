@@ -31,7 +31,7 @@ let numLeaderboardScores;
 let darkMode = false;
 let darkModeColor = 0;
 
-let showFound = false;
+let showFound = true;
 
 //sounds
 let pointSound;
@@ -265,18 +265,19 @@ function draw() {
         }
     }
 
-    if(showFound) {
-        fill(0);
+    if(showFound && width > height) { //no good way to list words on small windows and mobile
+        fill(darkModeColor);
         textAlign(CENTER, TOP);
-        let size = width/40;
+        let size = width/80 + height/50;
         textFont(font);
         textSize(size);
-        strokeWeight(size/20);
-        stroke(0);
-        text("Found:", width - width/6, height/6 - size);
+        strokeWeight(size/20); //stroke for a bold effect
+        stroke(darkModeColor);
+        text("Found:", width - width/7, height/9 - size);
         noStroke();
         for(let i = 0; i < wordsFound.length; i++) {
-            text(wordsFound[i], width - width/6, height/6 + i * size);
+            //writes two words per row
+            text(wordsFound[i], width  - width/7 - 1.5 * size + 3 * size*(i % 2), height/9 + Math.floor(i / 2) * size);
         }
     }
 
@@ -395,7 +396,7 @@ function touchEnded() {
     return false;
 }
 
-function touchMoved() {
+function touchMoved() { //prevent dragging the screen on mobile
     return false;
 }
 
