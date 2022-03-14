@@ -4,7 +4,8 @@ function Popup(id) {
     this.y = height * 3 / 2;
     this.w = height / 3 + width / 6;
     this.h = height * 7 / 10;
-    this.lineLen = this.w / 80;
+    this.lineLen = this.w / 120 + this.h / 100;
+    this.lineOffset = this.lineLen * 3;
     this.closing = false;
     this.buttons = [];
     this.data;
@@ -114,14 +115,14 @@ function Popup(id) {
         push();
         stroke(0 + darkModeColor);
         strokeWeight(1);
-        translate(this.x + this.w * 7 / 16, this.y - this.h * 7 / 16);
+        translate(this.x + this.w / 2 - this.lineOffset, this.y - this.h / 2 + this.lineOffset);
         line(-this.lineLen, -this.lineLen, this.lineLen, this.lineLen);
         line(this.lineLen, -this.lineLen, -this.lineLen, this.lineLen);
         pop();
     }
 
     this.onClick = function () {
-        if (dist(this.x + this.w * 7 / 16, this.y - this.h * 7 / 16, mouseX, mouseY) < this.lineLen * 2) {
+        if (dist(this.x + this.w / 2 - this.lineOffset, this.y - this.h / 2 + this.lineOffset, mouseX, mouseY) < this.lineLen * 2) {
             this.closing = true;
             return;
         }

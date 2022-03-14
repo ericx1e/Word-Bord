@@ -113,7 +113,7 @@ function setup() {
     font = loadFont("Ubuntu/Ubuntu-Light.ttf");
     font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
     icons = loadFont("fa.otf");
-    
+
     createButtons();
 
 
@@ -133,10 +133,10 @@ function setup() {
 
 function createButtons() {
     buttons = [];
-    
+
     let shift = width / 30 + height / 30;
-    let size = shift/2;
-    if(width > height) {
+    let size = shift / 2;
+    if (width > height) {
         buttons.push(new Button(shift, height - shift, size, "info"));
         buttons.push(new Button(width - shift, height - shift, size, "settings"));
         buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
@@ -148,7 +148,7 @@ function createButtons() {
         buttons.push(new Button(shift, height - shift, size, "info"));
         buttons.push(new Button(width - shift, height - shift, size, "settings"));
         buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
-        buttons.push(new Button(width -  shift, height - 2 * shift, size, "reset"));
+        buttons.push(new Button(width - shift, height - 2 * shift, size, "reset"));
         buttons.push(new Button(width - 2 * shift, height - 2 * shift, size, "leaderboard"));
     }
 }
@@ -265,21 +265,21 @@ function draw() {
         }
     }
 
-    if(showFound && width > height) { //no good way to list words on small windows and mobile
+    if (showFound && width > height) { //no good way to list words on small windows and mobile
         fill(darkModeColor);
         textAlign(CENTER, TOP);
-        let size = width/50 + height/50;
+        let size = width / 50 + height / 50;
         textFont(font);
         textSize(size);
-        strokeWeight(size/30); //stroke for a bold effect
+        strokeWeight(size / 30); //stroke for a bold effect
         stroke(darkModeColor);
-        text("Found:", width - width/7, height/9 - size);
+        text("Found:", width - width / 7, height / 9 - size);
         noStroke();
         size -= wordsFound.length / 2.3;
         textSize(size);
-        for(let i = 0; i < wordsFound.length; i++) {
+        for (let i = 0; i < wordsFound.length; i++) {
             //writes two words per row
-            text(wordsFound[i], width  - width/7 - 1.5 * size + 3 * size*(i % 2), height/9 + Math.floor(i / 2) * size);
+            text(wordsFound[i], width - width / 7 - 1.5 * size + 3 * size * (i % 2), height / 9 + Math.floor(i / 2) * size);
         }
     }
 
@@ -484,6 +484,12 @@ function scoreWord(str) {
 }
 
 function keyPressed() {
+    // fetch(`${API_URL}/solutions/${boardSize}`, {
+    //     method: 'GET'
+    // }).then(response => response.json()).then(data => {
+    //     // generate from API response
+    //     console.log(data);
+    // })
 }
 
 function undo() {
