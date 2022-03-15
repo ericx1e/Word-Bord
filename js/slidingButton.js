@@ -89,6 +89,7 @@ function SlidingButton(x, y, w, offset, id) {
             this.toggle = !this.toggle;
             if (id == "board size") {
                 this.update();
+                fadingTexts = [];
                 boardCreated = false;
                 board = [];
                 buttons = [];

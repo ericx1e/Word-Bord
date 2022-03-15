@@ -5,8 +5,14 @@ function Button(x, y, s, id) {
     this.h = s;
     this.id = id;
     this.pulse = 0;
+    this.disabledDuringReplay = ["undo", "reset", "leaderboard", "settings"];
 
     this.show = function () {
+        if (playingPrevSoln) {
+            if (this.disabledDuringReplay.includes(id)) {
+                return;
+            }
+        }
         switch (id) {
             case "settings":
                 noStroke();
@@ -50,6 +56,18 @@ function Button(x, y, s, id) {
                 textSize(this.w + this.pulse);
                 text('\uf091', this.x, this.y);
                 break;
+            case "prevsoln":
+                noStroke();
+                fill(0 + darkModeColor);
+                textFont(icons);
+                textAlign(CENTER, CENTER);
+                textSize(this.w + this.pulse);
+                if (playingPrevSoln) {
+                    text('\uf04d', this.x, this.y); //stop icon
+                } else {
+                    text('\uf122', this.x, this.y); //replay icon
+                }
+                break;
         }
         if (this.pulse > 0) {
             this.pulse--;
@@ -58,6 +76,11 @@ function Button(x, y, s, id) {
 
 
     this.update = function () {
+        if (playingPrevSoln) {
+            if (this.disabledDuringReplay.includes(id)) {
+                return;
+            }
+        }
         if (this.touchingMouse()) {
             this.pulse = this.w / 3;
             switch (id) {
@@ -75,6 +98,9 @@ function Button(x, y, s, id) {
                     break;
                 case "leaderboard":
                     popup = new Popup("leaderboard");
+                    break;
+                case "prevsoln":
+                    popup = new Popup("prevsoln");
                     break;
             }
         }

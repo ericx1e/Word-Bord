@@ -1,5 +1,6 @@
 const API_URL = "https://word-bord-api.herokuapp.com/api/v1";
 const days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const TOTAL_MOVES = 20;
 
 let boardSize = 4;
 let firstLoad = true;
@@ -14,7 +15,7 @@ let score = 0;
 let scorePulse = 0;
 let movesPulse = 0;
 let fadingTexts = [];
-let moves = 20;
+let moves = TOTAL_MOVES;
 let rotatingRows = false;
 let rotatingCols = false;
 let isPopup = false;
@@ -24,6 +25,9 @@ let scoreSent = false;
 let nameInputted = false;
 let minLeaderboardScore;
 let numLeaderboardScores;
+let playingPrevSoln = false;
+let replayStartFrame;
+let replayMoves;
 // let screenFade = 0;
 // let fa;
 
@@ -60,7 +64,7 @@ function createBoard() {
         loop();
     })
 
-    fetch(`${API_URL}/leaderboard`, {
+    fetch(`${API_URL}/leaderboard`, { //get the minimum leaderboard score on load 
         method: 'GET'
     }).then(response => response.json()).then(data => {
         /*
@@ -138,6 +142,7 @@ function createButtons() {
     let size = shift / 2;
     if (width > height) {
         buttons.push(new Button(shift, height - shift, size, "info"));
+        buttons.push(new Button(2 * shift, height - shift, size, "prevsoln"));
         buttons.push(new Button(width - shift, height - shift, size, "settings"));
         buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
         buttons.push(new Button(width - 3 * shift, height - shift, size, "reset"));
@@ -146,6 +151,7 @@ function createButtons() {
         shift *= 1.15;
         size *= 1.25;
         buttons.push(new Button(shift, height - shift, size, "info"));
+        buttons.push(new Button(2 * shift, height - shift, size, "prevsoln"));
         buttons.push(new Button(width - shift, height - shift, size, "settings"));
         buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
         buttons.push(new Button(width - shift, height - 2 * shift, size, "reset"));
@@ -268,19 +274,31 @@ function draw() {
     if (showFound && width > height) { //no good way to list words on small windows and mobile
         fill(darkModeColor);
         textAlign(CENTER, TOP);
-        let size = width / 50 + height / 50;
+        let size = height / 30;
         textFont(font);
         textSize(size);
         strokeWeight(size / 30); //stroke for a bold effect
         stroke(darkModeColor);
         text("Found:", width - width / 7, height / 9 - size);
         noStroke();
-        size -= wordsFound.length / 2.3;
+        // size *= 0.8;
         textSize(size);
-        for (let i = 0; i < wordsFound.length; i++) {
-            //writes two words per row
-            text(wordsFound[i], width - width / 7 - 1.5 * size + 3 * size * (i % 2), height / 9 + Math.floor(i / 2) * size);
+        // for (let i = 0; i < wordsFound.length; i++) {
+        //     //writes two words per row
+        //     text(wordsFound[i], width - width / 7 - 1.5 * size + 3 * size * (i % 2), height / 9 + Math.floor(i / 2) * size);
+        // }
+        for (let i = 0; i < movesMade.length; i++) {
+            let tx = "";
+            tx += join(movesMade[i].found, "\t");
+            // for (word in movesMade[i].found) {
+            //     tx.join(word;
+            // }
+            text(tx, width - width / 7, height / 9 + i * size);
         }
+    }
+
+    if (playingPrevSoln) {
+        updateReplay();
     }
 
     if (isPopup) {
@@ -288,6 +306,30 @@ function draw() {
     }
 }
 
+let replayIndex = 0; //which move the replay is on
+let replaySpeed = 40; //frames that pass between replay moves
+
+function updateReplay() {
+    if (replayIndex >= TOTAL_MOVES) {
+        return;
+    }
+    if ((frameCount - replayStartFrame) == replaySpeed) {
+        replayStartFrame += replaySpeed;
+        let a = parseInt(replayMoves[replayIndex * 3]);
+        let i = parseInt(replayMoves[replayIndex * 3 + 1]);
+        let n = parseInt(replayMoves[replayIndex * 3 + 2]);
+        a == 0 ? rotateRow(i, n) : rotateCol(i, n);
+        let _found = checkWords();
+        moves--;
+        movesPulse = 3;
+        if (a == 0) {
+            movesMade.push({ dir: "row", i: selectedRow, n: rot % boardSize, found: _found });
+        } else {
+            movesMade.push({ dir: "col", i: selectedCol, n: rot % boardSize, found: _found });
+        }
+        replayIndex++;
+    }
+}
 
 function rotateRow(row, n) {
     // let dir = n / Math.abs(n);
@@ -338,9 +380,15 @@ function touchStarted() {
         popup.onClick();
         return false;
     }
+
     buttons.forEach(button => {
         button.update();
     });
+
+    if (playingPrevSoln) {
+        return false;
+    }
+
     selectedRow = parseInt((mouseY - height / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
     selectedCol = parseInt((mouseX - width / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
     if (selectedRow >= 0 && selectedRow < boardSize && selectedCol >= 0 && selectedCol < boardSize) {
@@ -366,8 +414,8 @@ function touchEnded() {
     if (moves <= 0) {
         return;
     }
-    let _found = checkWords();
     if (rot % boardSize != 0) {
+        let _found = checkWords();
         moves--;
         movesPulse = 3;
         if (rotatingRows) {
@@ -484,12 +532,6 @@ function scoreWord(str) {
 }
 
 function keyPressed() {
-    // fetch(`${API_URL}/solutions/${boardSize}`, {
-    //     method: 'GET'
-    // }).then(response => response.json()).then(data => {
-    //     // generate from API response
-    //     console.log(data);
-    // })
 }
 
 function undo() {

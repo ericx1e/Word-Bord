@@ -105,6 +105,13 @@ function Popup(id) {
             case "name":
                 text("New High Score!\n\n\nClick to enter your name", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
                 break;
+            case "prevsoln":
+                if (playingPrevSoln) {
+                    text("Click to exit replay", this.x, this.y - this.h / 3, this.w * 9 / 10);
+                } else {
+                    text("Click to see yesterday's maximum score\n\nWarning: this will erase your current progress", this.x, this.y - this.h / 3, this.w * 9 / 10);
+                }
+                break;
         }
 
         this.buttons.forEach(button => {
@@ -122,12 +129,11 @@ function Popup(id) {
     }
 
     this.onClick = function () {
-        if (dist(this.x + this.w / 2 - this.lineOffset, this.y - this.h / 2 + this.lineOffset, mouseX, mouseY) < this.lineLen * 2) {
+        if (this.closing || dist(this.x + this.w / 2 - this.lineOffset, this.y - this.h / 2 + this.lineOffset, mouseX, mouseY) < this.lineLen * 2) {
             this.closing = true;
             return;
         }
         if (id == "name" && !scoreSent) {
-
             let name = prompt("Enter your name (6 characters max)");
             fetch(`${API_URL}/leaderboard`, {
                 method: 'POST',
@@ -173,8 +179,72 @@ function Popup(id) {
                 }
             })
         }
+
+        if (id == "prevsoln") {
+            if (playingPrevSoln) {
+                fetch(`${API_URL}/board/${boardSize}`, {
+                    method: 'GET'
+                }).then(response => response.json()).then(data => {
+                    if (data.err) {
+                        console.log(data.err);
+                    } else {
+                        for (let r = 0; r < boardSize; r++) {
+                            board[r] = [];
+                            for (let c = 0; c < boardSize; c++) {
+                                board[r][c] = new Tile(r, c, data[r][c].toUpperCase());
+                            }
+                        }
+                    }
+                })
+
+                this.closing = true;
+                playingPrevSoln = false;
+            } else {
+                fetch(`${API_URL}/prevboard/${boardSize}`, {
+                    method: 'GET'
+                }).then(response => response.json()).then(data => {
+                    if (data.err) {
+                        console.log(data.err);
+                    } else {
+                        for (let r = 0; r < boardSize; r++) {
+                            board[r] = [];
+                            for (let c = 0; c < boardSize; c++) {
+                                board[r][c] = new Tile(r, c, data[r][c].toUpperCase());
+                            }
+                        }
+                    }
+                })
+
+                fetch(`${API_URL}/solutions/${boardSize}`, {
+                    method: 'GET'
+                }).then(response => response.json()).then(data => {
+                    if (data.err) {
+                        console.log(data.err);
+                    } else {
+                        replayMoves = data.split(' ');
+                    }
+                })
+
+                this.closing = true;
+                playingPrevSoln = true;
+                replayStartFrame = frameCount + 90; //delay by 1.5 seconds
+                replayIndex = 0;
+            }
+            resetVars();
+        }
+
+
         this.buttons.forEach(button => {
             button.click();
         });
     }
+}
+
+function resetVars() {
+    fadingTexts = [];
+    rot = 0;
+    wordsFound = [];
+    score = 0;
+    moves = 20;
+    movesMade = [];
 }
