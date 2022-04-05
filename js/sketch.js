@@ -18,7 +18,6 @@ let fadingTexts = [];
 let moves = TOTAL_MOVES;
 let rotatingRows = false;
 let rotatingCols = false;
-let isPopup = false;
 let popup;
 let boardCreated = false;
 let scoreSent = false;
@@ -99,6 +98,18 @@ function windowResized() {
     canvas.position(0, 0);
 
     tileSize = height / 18 + width / 36 * 5 / 5;
+
+    if (popup) {
+        if (popup.links) {
+            popup.links.forEach(link => {
+                link.remove();
+            });
+            popup.links = [];
+        }
+        popup = new Popup(popup.id);
+        popup.x = width / 2;
+        popup.y = height / 2;
+    }
 
     createButtons();
 }
@@ -301,7 +312,7 @@ function draw() {
         updateReplay();
     }
 
-    if (isPopup) {
+    if (popup) {
         popup.show();
     }
 }
@@ -376,7 +387,7 @@ let selectedRow = -1;
 let selectedCol = -1;
 
 function touchStarted() {
-    if (isPopup) {
+    if (popup) {
         popup.onClick();
         return false;
     }

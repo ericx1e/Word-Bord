@@ -1,5 +1,5 @@
 function Popup(id) {
-    isPopup = true;
+    this.id = id;
     this.x = width / 2;
     this.y = height * 3 / 2;
     this.w = height / 3 + width / 6;
@@ -10,6 +10,23 @@ function Popup(id) {
     this.buttons = [];
     this.data;
     this.gotData = false;
+    let iconSize = this.w / 10;
+
+    this.links;
+
+    if (id == "welcome") {
+        this.links = []
+        this.links.push(createA('https://github.com/ericx1e', "").class("fab fa-github fa-3x"));
+        // this.links.push(createA('https://24thegame.com', "").class("fab fa-youtube fa-3x"));
+        // this.links.push(createA('https://24thegame.com', "").class("fab fa-twitter fa-3x"));
+        // a.style("font-family", "Font Awesome 5 Free");
+
+        this.links.forEach(link => {
+            link.style('font-size', iconSize + 'px');
+            link.style("color", "black")
+            link.style("text-decoration", "none")
+        })
+    }
 
     if (id == "settings") {
         this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, -this.h / 4, "dark mode"));
@@ -37,7 +54,6 @@ function Popup(id) {
             }
             */
 
-
             if (data.err) {
                 console.log(data.err);
             } else {
@@ -61,7 +77,12 @@ function Popup(id) {
             });
         }
         if (this.y > height * 10 / 7 && this.closing) {
-            isPopup = false;
+            if (this.links) {
+                this.links.forEach(link => {
+                    link.remove();
+                });
+            }
+            popup = undefined;
         }
 
         rectMode(CENTER);
@@ -74,14 +95,20 @@ function Popup(id) {
         rect(this.x, this.y, this.w, this.h, this.w / 20);
 
         textAlign(CENTER, CENTER);
-        textSize(this.w / 24);
+        textSize(this.h / 34 + this.w / 90);
         textFont(font);
         textWrap(WORD);
         fill(0 + darkModeColor);
 
         switch (id) {
             case "welcome":
-                text("Click and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nScore as many points as possible in 20 moves\n\nCome back every day for a new Word Bord!\n\n\n\nMade by Eric Xie", this.x, this.y - this.h / 3, this.w * 9 / 10);
+                text("Click and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nScore as many points as possible in 20 moves\n\nCome back every day for a new Word Bord!\n\n\nMade by Eric Xie", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
+
+                if (this.links) {
+                    this.links.forEach((link, i) => {
+                        link.position(this.x + iconSize / 2 + 2 * i * iconSize - this.links.length * iconSize, this.y + this.h / 2 - iconSize * 1.7);
+                    });
+                }
                 break;
             case "gameover":
                 text(`Out of moves!\n\n\nYou scored ${score} points \n\nRestart to try again or come back tomorrow for a new Word Bord`, this.x, this.y - this.h / 4, this.w * 9 / 10);
