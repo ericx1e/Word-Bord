@@ -41,8 +41,8 @@ let pointSound;
 let bigPointSound;
 
 function preload() {
-    pointSound = loadSound("sounds/mixkit-happy-bell-alert-601.wav");
-    bigPointSound = loadSound("sounds/mixkit-achievement-bell-600.wav");
+    // pointSound = loadSound("sounds/mixkit-happy-bell-alert-601.wav");
+    // bigPointSound = loadSound("sounds/mixkit-achievement-bell-600.wav");
 }
 
 function createBoard() {
