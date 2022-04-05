@@ -43,6 +43,9 @@ let bigPointSound;
 function preload() {
     // pointSound = loadSound("sounds/mixkit-happy-bell-alert-601.wav");
     // bigPointSound = loadSound("sounds/mixkit-achievement-bell-600.wav");
+    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
+    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
+    icons = loadFont("fa.otf");
 }
 
 function createBoard() {
@@ -125,9 +128,6 @@ function setup() {
     noLoop();
     dict = loadStrings("dictionaries/words" + boardSize + ".txt");
     createBoard()
-    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
-    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
-    icons = loadFont("fa.otf");
 
     createButtons();
 
