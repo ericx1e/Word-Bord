@@ -10,7 +10,7 @@ function Popup(id) {
     this.buttons = [];
     this.data;
     this.gotData = false;
-    let iconSize = this.w / 10;
+    let iconSize = this.w / 12;
 
     this.links;
 
@@ -23,7 +23,7 @@ function Popup(id) {
 
         this.links.forEach(link => {
             link.style('font-size', iconSize + 'px');
-            link.style("color", "black")
+            link.style("color", "grey")
             link.style("text-decoration", "none")
         })
     }
@@ -95,7 +95,7 @@ function Popup(id) {
         rect(this.x, this.y, this.w, this.h, this.w / 20);
 
         textAlign(CENTER, CENTER);
-        textSize(this.h / 34 + this.w / 90);
+        textSize(this.h / 35 + this.w / 90);
         textFont(font);
         textWrap(WORD);
         fill(0 + darkModeColor);
@@ -106,7 +106,7 @@ function Popup(id) {
 
                 if (this.links) {
                     this.links.forEach((link, i) => {
-                        link.position(this.x + iconSize / 2 + 2 * i * iconSize - this.links.length * iconSize, this.y + this.h / 2 - iconSize * 1.7);
+                        link.position(this.x + iconSize / 2 + 2 * i * iconSize - this.links.length * iconSize, this.y + this.h / 2 - iconSize * 2);
                     });
                 }
                 break;

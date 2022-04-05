@@ -49,7 +49,7 @@ function preload() {
 }
 
 function createBoard() {
-    tileSize = height / 18 + width / 36 * 5 / 5;
+    setTileSize();
     fetch(`${API_URL}/board/${boardSize}`, {
         method: 'GET'
     }).then(response => response.json()).then(data => {
@@ -96,11 +96,15 @@ function createBoard() {
     })
 }
 
+function setTileSize() {
+    tileSize = height / 15 + width / 36 * 5 / boardSize;
+}
+
 function windowResized() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
 
-    tileSize = height / 18 + width / 36 * 5 / 5;
+    setTileSize();
 
     if (popup) {
         if (popup.links) {
@@ -199,7 +203,7 @@ function draw() {
     //     return;
     // }
 
-    // if (isPopup) {
+    // if (popup) {
     //     background(255 - darkModeColor);
     // } else {
     //     rectMode(CORNER);
@@ -217,20 +221,20 @@ function draw() {
     fill(0 + darkModeColor);
     noStroke();
     textFont(font);
-    textSize(tileSize / 2 + scorePulse);
+    textSize(tileSize / 2.5 + scorePulse);
     if (scorePulse > 0) {
         scorePulse -= 0.7;
     }
     textAlign(CENTER, CENTER);
     text("SCORE: " + score, width / 2, height * 13.5 / 16);
-    textSize(tileSize / 2 + movesPulse);
+    textSize(tileSize / 2.5 + movesPulse);
     if (movesPulse > 0) {
         movesPulse -= 0.5;
     }
     textAlign(CENTER, CENTER);
     text("MOVES: " + moves, width / 2, height * 15 / 16);
 
-    textSize(tileSize);
+    textSize(tileSize * 0.9);
     text("WORD BORD", width / 2, height / 8);
 
     textFont("Arial");

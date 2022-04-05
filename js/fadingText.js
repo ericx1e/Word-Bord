@@ -10,7 +10,7 @@ function FadingText(x, y, s) {
         textSize(height / 50 + width / 50);
         textFont(font2);
         text(this.s, this.x, this.y);
-        this.y -= 1;
+        this.y -= width / 2000 + height / 5000;
         this.life -= 2;
     }
 }
