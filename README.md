@@ -1,4 +1,3 @@
-
 <br>
 
 <h3 align="center">
@@ -23,7 +22,12 @@ Rotate rows and columns to form words in this daily Scrabble meets Rubik's Cube 
 <li>A new bord is available every day at 12am
 </ul>
 
-<a href="https://github.com/ericx1e/Word-Bord/issues">Suggest Feature or Report Bug</a>
+<a href="https://github.com/ericx1e/Word-Bord/issues">🐛 Suggest Feature or Report Bug</a>
+
+<a href="https://github.com/ericx1e/WordBordAPI">💻 Check out the API</a>
+
+<a href="https://github.com/ericx1e/WordBordSolver">💡 Check out the solver</a>
+
 
 ## Images
 
