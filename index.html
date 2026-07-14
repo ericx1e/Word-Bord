@@ -84,7 +84,12 @@
       }
 
       body {
-        background: #fbf5e9;
+        /* paper + dot grid live here so the GPU composites them for free;
+           the canvas above is transparent */
+        background-color: #fbf5e9;
+        background-image: radial-gradient(circle, rgba(128, 128, 128, 0.16) 1.4px, transparent 1.5px);
+        background-size: 34px 34px;
+        transition: background-color 0.5s;
       }
 
       h1 {
@@ -92,7 +97,7 @@
       }
 
       html.dark body {
-        background: #282c31;
+        background-color: #282c31;
       }
 
       html.dark h1 {

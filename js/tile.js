@@ -7,30 +7,30 @@ function Tile(r, c, s) {
     this.highlightDur = 0;
     //fixed per-tile jitter so each tile looks hand-placed without flickering
     this.tilt = random(-0.05, 0.05);
-    this.radiusJitter = random(0.8, 1.25);
+    this.bucket = Math.floor(random(3)); //picks one of the cached tile faces
 
     this.show = function () {
-        const size = tileSize * 9 / 10;
-
         push();
         translate(this.x, this.y);
         rotate(this.tilt);
 
-        //found words flash highlighter yellow, then fade back to paper
         if (this.highlightDur > 0) {
+            //found-word flash: draw the face live so the fill can fade back to paper
+            const size = tileSize * 9 / 10;
+            const rj = 0.8 + 0.2 * this.bucket;
             fill(lerpColor(tileC, accentC, Math.min(this.highlightDur, 120) / 120));
             this.highlightDur -= 6;
+            stroke(inkC);
+            strokeWeight(Math.max(1.5, tileSize / 40));
+            rect(0, 0, size, size, tileSize / 5.5 * rj);
+            noFill();
+            stroke(red(inkC), green(inkC), blue(inkC), 70);
+            rect(0, 0, size * 1.035, size * 1.02, tileSize / 4.5 * rj);
         } else {
-            fill(tileC);
+            //settled face is a cached sprite: one blit instead of two path strokes
+            const g = tileSprite(this.bucket);
+            image(g, -g.width / 2, -g.height / 2);
         }
-        stroke(inkC);
-        strokeWeight(Math.max(1.5, tileSize / 40));
-        rect(0, 0, size, size, tileSize / 5.5 * this.radiusJitter);
-
-        //second, fainter outline slightly off from the first reads as sketched ink
-        noFill();
-        stroke(red(inkC), green(inkC), blue(inkC), 70);
-        rect(0, 0, size * 1.035, size * 1.02, tileSize / 4.5 * this.radiusJitter);
 
         fill(inkC);
         noStroke();

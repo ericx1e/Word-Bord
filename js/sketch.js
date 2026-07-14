@@ -9,8 +9,11 @@ const THEME = {
     accent: ['#ffd95e', '#dcb945'],  //highlighter yellow
 };
 let paperC, inkC, tileC, accentC; //current frame's colors, updated in draw()
-let dotsLayer; //pre-rendered notebook-dot background, rebuilt on resize
 let idleFrames = 0; //frames since anything last animated
+let headerLayer, headerKey = ""; //cached title + underline
+let tileSprites = {}, tileSpriteKey = ""; //cached tile faces, keyed by corner-radius bucket
+let lowPower = false; //auto quality: drops pixel density when frames run slow
+let slowFrames = 0;
 
 let boardSize = 4;
 let firstLoad = true;
@@ -63,6 +66,9 @@ function createBoard() {
     loadDailyBoard(0, () => {
         restoreOrInitGame();
         boardCreated = true;
+        //the canvas is transparent now, so the DOM loading screen must go
+        const loadingEl = document.querySelector(".center");
+        if (loadingEl) loadingEl.remove();
         loop();
     });
 }
@@ -219,19 +225,71 @@ function updateThemeColors() {
     inkC = lerpColor(color(THEME.ink[0]), color(THEME.ink[1]), t);
     tileC = lerpColor(color(THEME.tile[0]), color(THEME.tile[1]), t);
     accentC = lerpColor(color(THEME.accent[0]), color(THEME.accent[1]), t);
+
+    //the page body owns the background; keep its theme class in sync
+    if (updateThemeColors._dark !== darkMode) {
+        updateThemeColors._dark = darkMode;
+        document.documentElement.classList.toggle("dark", darkMode);
+    }
 }
 
-function buildDotsLayer() {
-    dotsLayer = createGraphics(width, height);
-    dotsLayer.pixelDensity(1); //background texture doesn't need retina resolution
-    dotsLayer.noStroke();
-    dotsLayer.fill(128, 128, 128, 40);
-    const gap = Math.max(30, (width + height) / 50);
-    for (let x = gap / 2; x < width; x += gap) {
-        for (let y = gap / 2; y < height; y += gap) {
-            dotsLayer.circle(x, y, gap / 12);
+//title + marker underline, re-rendered only when the theme or layout changes
+function drawHeader() {
+    const key = Math.round(darkModeColor) + "-" + Math.round(tileSize) + "-" + width;
+    if (key !== headerKey) {
+        headerKey = key;
+        const w = Math.ceil(tileSize * 4.4);
+        const h = Math.ceil(tileSize * 1.6);
+        if (!headerLayer || headerLayer.width != w || headerLayer.height != h) {
+            headerLayer = createGraphics(w, h);
+        } else {
+            headerLayer.clear();
         }
+        headerLayer.strokeJoin(ROUND);
+        headerLayer.strokeCap(ROUND);
+        headerLayer.textFont(font);
+        headerLayer.textAlign(CENTER, CENTER);
+        headerLayer.textSize(tileSize * 0.9);
+        headerLayer.fill(inkC);
+        headerLayer.noStroke();
+        headerLayer.text("Word Bord", w / 2, h * 0.4);
+        headerLayer.stroke(accentC);
+        headerLayer.strokeWeight(tileSize / 14);
+        headerLayer.noFill();
+        const underW = tileSize * 3.6;
+        const uy = h * 0.4 + tileSize * 0.58;
+        headerLayer.beginShape();
+        for (let i = 0; i <= 10; i++) {
+            headerLayer.vertex(w / 2 - underW / 2 + underW * i / 10, uy + (noise(i * 3.7) - 0.5) * tileSize * 0.14);
+        }
+        headerLayer.endShape();
     }
+    image(headerLayer, width / 2 - headerLayer.width / 2, height / 8 - headerLayer.height * 0.4);
+}
+
+//tile face (paper + sketchy double outline), cached per corner-radius bucket
+function tileSprite(bucket) {
+    const key = Math.round(darkModeColor) + "-" + Math.round(tileSize);
+    if (key !== tileSpriteKey) {
+        tileSpriteKey = key;
+        tileSprites = {};
+    }
+    if (!tileSprites[bucket]) {
+        const size = tileSize * 9 / 10;
+        const pad = Math.ceil(tileSize * 0.06);
+        const g = createGraphics(Math.ceil(size * 1.035) + pad * 2, Math.ceil(size * 1.02) + pad * 2);
+        const rj = 0.8 + 0.2 * bucket;
+        g.rectMode(CENTER);
+        g.stroke(inkC);
+        g.strokeWeight(Math.max(1.5, tileSize / 40));
+        g.fill(tileC);
+        g.rect(g.width / 2, g.height / 2, size, size, tileSize / 5.5 * rj);
+        g.noFill();
+        g.stroke(red(inkC), green(inkC), blue(inkC), 70);
+        g.rect(g.width / 2, g.height / 2, size * 1.035, size * 1.02, tileSize / 4.5 * rj);
+        tileSprites[bucket] = g;
+    }
+    return tileSprites[bucket];
 }
 
 function windowResized() {
@@ -240,7 +298,6 @@ function windowResized() {
     idleFrames = 0; //the new canvas is blank, so repaint
 
     setTileSize();
-    buildDotsLayer();
 
     if (popup) {
         if (popup.links) {
@@ -259,13 +316,13 @@ function windowResized() {
 
 function setup() {
     boardCreated = false;
+    lowPower = storageGet("wordbord-lowpower", false);
     //cap density: 3x phone screens otherwise push 2.25x the pixels for no visible gain
-    pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+    pixelDensity(lowPower ? 1 : Math.min(window.devicePixelRatio || 1, 2));
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
     strokeJoin(ROUND);
     strokeCap(ROUND);
-    buildDotsLayer();
     if (firstLoad) {
         // popup = new Popup("welcome");
         firstLoad = false;
@@ -378,8 +435,21 @@ function draw() {
     }
     updateThemeColors();
 
-    background(paperC);
-    image(dotsLayer, 0, 0);
+    clear(); //the paper + dots background is CSS on the body
+
+    //auto quality: if animated frames keep missing ~33fps, drop to 1x density for good
+    if (!lowPower && frameCount > 120 && deltaTime > 30 && deltaTime < 500) {
+        if (++slowFrames >= 45) {
+            lowPower = true;
+            storageSet("wordbord-lowpower", true);
+            pixelDensity(1);
+            headerKey = "";
+            tileSpriteKey = "";
+            idleFrames = 0;
+        }
+    } else if (slowFrames > 0 && deltaTime < 20) {
+        slowFrames--;
+    }
 
     fill(inkC);
     noStroke();
@@ -405,21 +475,7 @@ function draw() {
     }
     text("Moves: " + moves, width / 2, height * 15 / 16);
 
-    textSize(tileSize * 0.9);
-    text("Word Bord", width / 2, height / 8);
-
-    //hand-drawn highlighter underline beneath the title
-    stroke(accentC);
-    strokeWeight(tileSize / 14);
-    noFill();
-    const underW = tileSize * 3.6;
-    const underY = height / 8 + tileSize * 0.58;
-    beginShape();
-    for (let i = 0; i <= 10; i++) {
-        vertex(width / 2 - underW / 2 + underW * i / 10,
-            underY + (noise(i * 3.7) - 0.5) * tileSize * 0.14);
-    }
-    endShape();
+    drawHeader();
 
     rectMode(CENTER);
 
