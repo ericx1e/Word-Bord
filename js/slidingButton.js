@@ -7,7 +7,6 @@ function SlidingButton(x, y, w, offset, id) {
     this.offset = offset;
     this.toggle = false; //false is left, true is right
     this.buttonX = this.x + this.w / 4;
-    this.color = 220;
     switch (id) {
         case "dark mode":
             this.toggle = darkMode;
@@ -35,18 +34,23 @@ function SlidingButton(x, y, w, offset, id) {
                 break;
         }
 
-        fill(0 + darkModeColor);
+        fill(inkC);
         textSize(this.h / 1.5);
         text(tx, this.x - this.fullW * 12.5 / 16, this.y);
 
+        //knob position doubles as the on/off amount for the track color
+        const onAmt = constrain(map(this.buttonX, this.x - this.w / 4, this.x + this.w / 4, 0, 1), 0, 1);
+
         rectMode(CENTER);
-        noStroke();
-        fill(this.color - darkModeColor / 2);
+        stroke(inkC);
+        strokeWeight(2);
+        fill(lerpColor(paperC, accentC, onAmt));
         rect(this.x, this.y, this.w, this.h, this.h / 2);
-        fill(this.color / 2 - darkModeColor / 4);
+        fill(tileC);
         ellipse(this.buttonX, this.y, this.h * 9 / 10, this.h * 9 / 10);
 
-        fill(255);
+        noStroke();
+        fill(inkC);
         textAlign(CENTER, CENTER);
         textSize(this.h / 3);
         switch (id) {
@@ -66,10 +70,8 @@ function SlidingButton(x, y, w, offset, id) {
     this.update = function () {
         if (this.toggle) {
             this.buttonX = lerp(this.buttonX, this.x + this.w / 4, 0.1);
-            this.color += 1.5 * (lerp(this.buttonX, this.x + this.w / 4, 0.2) - this.buttonX);
         } else {
             this.buttonX = lerp(this.buttonX, this.x - this.w / 4, 0.1);
-            this.color += 1.5 * (lerp(this.buttonX, this.x - this.w / 4, 0.2) - this.buttonX);
         }
         switch (id) {
             case "dark mode":

@@ -57,19 +57,26 @@ function Popup(id) {
         }
 
         rectMode(CENTER);
+        //flat offset shadow: one rect for a paper-cutout feel (the old glow drew ~25 rects per frame)
         noStroke();
-        for (let i = this.w / 25; i > 0; i--) {
-            fill(205 + i - darkModeColor, 5);
-            rect(this.x, this.y, this.w + i, this.h + i, (this.w + i) / 20);
-        }
-        fill(255 - darkModeColor);
-        rect(this.x, this.y, this.w, this.h, this.w / 20);
+        fill(red(inkC), green(inkC), blue(inkC), 30);
+        rect(this.x + this.w / 60, this.y + this.w / 45, this.w, this.h, this.w / 20);
 
+        fill(tileC);
+        stroke(inkC);
+        strokeWeight(2.5);
+        rect(this.x, this.y, this.w, this.h, this.w / 20);
+        //fainter second outline for a sketched-ink border
+        noFill();
+        stroke(red(inkC), green(inkC), blue(inkC), 70);
+        rect(this.x, this.y, this.w * 1.012, this.h * 1.015, this.w / 17);
+
+        noStroke();
         textAlign(CENTER, CENTER);
         textSize(this.h / 35 + this.w / 90);
         textFont(font);
         textWrap(WORD);
-        fill(0 + darkModeColor);
+        fill(inkC);
 
         switch (id) {
             case "welcome":
@@ -102,8 +109,8 @@ function Popup(id) {
         });
 
         push();
-        stroke(0 + darkModeColor);
-        strokeWeight(1);
+        stroke(inkC);
+        strokeWeight(3);
         translate(this.x + this.w / 2 - this.lineOffset, this.y - this.h / 2 + this.lineOffset);
         line(-this.lineLen, -this.lineLen, this.lineLen, this.lineLen);
         line(this.lineLen, -this.lineLen, -this.lineLen, this.lineLen);

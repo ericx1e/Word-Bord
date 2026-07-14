@@ -1,6 +1,16 @@
 const TOTAL_MOVES = 20;
 const EPOCH_UTC = Date.UTC(2024, 0, 1); //day counter starts at 2024-01-01, matching the original API
 
+//doodle palette: [light theme, dark theme]
+const THEME = {
+    paper: ['#fbf5e9', '#282c31'],   //background
+    ink: ['#3a352e', '#e9e4d8'],     //text and outlines
+    tile: ['#fffdf5', '#343a41'],    //tile and popup fill
+    accent: ['#ffd95e', '#dcb945'],  //highlighter yellow
+};
+let paperC, inkC, tileC, accentC; //current frame's colors, updated in draw()
+let dotsLayer; //pre-rendered notebook-dot background, rebuilt on resize
+
 let boardSize = 4;
 let firstLoad = true;
 let tileSize;
@@ -38,8 +48,8 @@ let bigPointSound;
 function preload() {
     // pointSound = loadSound("sounds/mixkit-happy-bell-alert-601.wav");
     // bigPointSound = loadSound("sounds/mixkit-achievement-bell-600.wav");
-    font = loadFont("Ubuntu/Ubuntu-Light.ttf");
-    font2 = loadFont("Ubuntu/Ubuntu-Regular.ttf");
+    font = loadFont("fonts/PatrickHand-Regular.ttf");
+    font2 = font;
     icons = loadFont("fa.otf");
 }
 
@@ -84,11 +94,33 @@ function setTileSize() {
     tileSize = height / 15 + width / 36 * 5 / boardSize;
 }
 
+function updateThemeColors() {
+    const t = darkModeColor / 215;
+    paperC = lerpColor(color(THEME.paper[0]), color(THEME.paper[1]), t);
+    inkC = lerpColor(color(THEME.ink[0]), color(THEME.ink[1]), t);
+    tileC = lerpColor(color(THEME.tile[0]), color(THEME.tile[1]), t);
+    accentC = lerpColor(color(THEME.accent[0]), color(THEME.accent[1]), t);
+}
+
+function buildDotsLayer() {
+    dotsLayer = createGraphics(width, height);
+    dotsLayer.pixelDensity(1); //background texture doesn't need retina resolution
+    dotsLayer.noStroke();
+    dotsLayer.fill(128, 128, 128, 40);
+    const gap = Math.max(30, (width + height) / 50);
+    for (let x = gap / 2; x < width; x += gap) {
+        for (let y = gap / 2; y < height; y += gap) {
+            dotsLayer.circle(x, y, gap / 12);
+        }
+    }
+}
+
 function windowResized() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
 
     setTileSize();
+    buildDotsLayer();
 
     if (popup) {
         if (popup.links) {
@@ -107,8 +139,13 @@ function windowResized() {
 
 function setup() {
     boardCreated = false;
+    //cap density: 3x phone screens otherwise push 2.25x the pixels for no visible gain
+    pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
+    strokeJoin(ROUND);
+    strokeCap(ROUND);
+    buildDotsLayer();
     if (firstLoad) {
         // popup = new Popup("welcome");
         firstLoad = false;
@@ -185,22 +222,17 @@ function draw() {
     //     return;
     // }
 
-    // if (popup) {
-    //     background(255 - darkModeColor);
-    // } else {
-    //     rectMode(CORNER);
-    //     fill(255 - darkModeColor, 100);
-    //     rect(0, 0, width, height);
-    // }
-    background(255 - darkModeColor);
-
     if (darkMode) {
         darkModeColor = lerp(darkModeColor, 215, 0.1);
     } else {
         darkModeColor = lerp(darkModeColor, 0, 0.1);
     }
+    updateThemeColors();
 
-    fill(0 + darkModeColor);
+    background(paperC);
+    image(dotsLayer, 0, 0);
+
+    fill(inkC);
     noStroke();
     textFont(font);
     textSize(tileSize / 2.5 + scorePulse);
@@ -208,23 +240,31 @@ function draw() {
         scorePulse -= 0.7;
     }
     textAlign(CENTER, CENTER);
-    text("SCORE: " + score, width / 2, height * 13.5 / 16);
+    text("Score: " + score, width / 2, height * 13.5 / 16);
     textSize(tileSize / 2.5 + movesPulse);
     if (movesPulse > 0) {
         movesPulse -= 0.5;
     }
     textAlign(CENTER, CENTER);
-    text("MOVES: " + moves, width / 2, height * 15 / 16);
+    text("Moves: " + moves, width / 2, height * 15 / 16);
 
     textSize(tileSize * 0.9);
-    text("WORD BORD", width / 2, height / 8);
+    text("Word Bord", width / 2, height / 8);
 
-    textFont("Arial");
-    stroke(0);
-    strokeWeight(10);
+    //hand-drawn highlighter underline beneath the title
+    stroke(accentC);
+    strokeWeight(tileSize / 14);
     noFill();
+    const underW = tileSize * 3.6;
+    const underY = height / 8 + tileSize * 0.58;
+    beginShape();
+    for (let i = 0; i <= 10; i++) {
+        vertex(width / 2 - underW / 2 + underW * i / 10,
+            underY + (noise(i * 3.7) - 0.5) * tileSize * 0.14);
+    }
+    endShape();
+
     rectMode(CENTER);
-    // rect(width / 2, height / 2, tileSize * 5, tileSize * 5, tileSize / 4);
 
     buttons.forEach(button => {
         button.show();
@@ -269,13 +309,13 @@ function draw() {
     }
 
     if (showFound && width > height) { //no good way to list words on small windows and mobile
-        fill(darkModeColor);
+        fill(inkC);
         textAlign(CENTER, TOP);
         let size = height / 30;
         textFont(font);
         textSize(size);
         strokeWeight(size / 30); //stroke for a bold effect
-        stroke(darkModeColor);
+        stroke(inkC);
         text("Found:", width - width / 7, height / 9 - size);
         noStroke();
         // size *= 0.8;

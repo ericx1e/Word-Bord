@@ -16,7 +16,7 @@ function Button(x, y, s, id) {
         switch (id) {
             case "settings":
                 noStroke();
-                fill(0 + darkModeColor);
+                fill(inkC);
                 textFont(icons);
                 textAlign(CENTER, CENTER);
                 textSize(this.w + this.pulse);
@@ -26,7 +26,7 @@ function Button(x, y, s, id) {
                 break;
             case "undo":
                 noStroke();
-                fill(0 + darkModeColor);
+                fill(inkC);
                 textFont(icons);
                 textAlign(CENTER, CENTER);
                 textSize(this.w + this.pulse);
@@ -34,7 +34,7 @@ function Button(x, y, s, id) {
                 break;
             case "reset":
                 noStroke();
-                fill(0 + darkModeColor);
+                fill(inkC);
                 textFont(icons);
                 textAlign(CENTER, CENTER);
                 textSize(this.w + this.pulse);
@@ -42,7 +42,7 @@ function Button(x, y, s, id) {
                 break;
             case "info":
                 noStroke();
-                fill(0 + darkModeColor);
+                fill(inkC);
                 textFont(icons);
                 textAlign(CENTER, CENTER);
                 textSize(this.w + this.pulse);
@@ -50,7 +50,7 @@ function Button(x, y, s, id) {
                 break;
             case "prevsoln":
                 noStroke();
-                fill(0 + darkModeColor);
+                fill(inkC);
                 textFont(icons);
                 textAlign(CENTER, CENTER);
                 textSize(this.w + this.pulse);

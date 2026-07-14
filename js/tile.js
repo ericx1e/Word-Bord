@@ -5,34 +5,40 @@ function Tile(r, c, s) {
     this.y = height / 2 + r * tileSize - (boardSize - 1) / 2 * tileSize;
     this.s = s;
     this.highlightDur = 0;
+    //fixed per-tile jitter so each tile looks hand-placed without flickering
+    this.tilt = random(-0.05, 0.05);
+    this.radiusJitter = random(0.8, 1.25);
 
     this.show = function () {
-        // noStroke();
-        textAlign(CENTER, CENTER);
-        textSize(tileSize / 2);
+        const size = tileSize * 9 / 10;
 
+        push();
+        translate(this.x, this.y);
+        rotate(this.tilt);
+
+        //found words flash highlighter yellow, then fade back to paper
         if (this.highlightDur > 0) {
-            stroke(80, 80 + this.highlightDur, 80);
-            this.highlightDur -= 3;
+            fill(lerpColor(tileC, accentC, Math.min(this.highlightDur, 120) / 120));
+            this.highlightDur -= 6;
         } else {
-            stroke(80);
+            fill(tileC);
         }
-        strokeWeight(tileSize/25);
+        stroke(inkC);
+        strokeWeight(Math.max(1.5, tileSize / 40));
+        rect(0, 0, size, size, tileSize / 5.5 * this.radiusJitter);
 
-        // rect(this.x, this.y, tileSize * 9.4 / 10, tileSize * 9.4 / 10, tileSize / 5);
-        // fill(130);
+        //second, fainter outline slightly off from the first reads as sketched ink
+        noFill();
+        stroke(red(inkC), green(inkC), blue(inkC), 70);
+        rect(0, 0, size * 1.035, size * 1.02, tileSize / 4.5 * this.radiusJitter);
 
-        if (this.highlightDur > 0) {
-            fill(130 - darkModeColor/3, 130 + this.highlightDur - darkModeColor/3, 130 - darkModeColor/3);
-            this.highlightDur -= 3;
-        } else {
-            fill(130 - darkModeColor/3);
-        }
-
-        rect(this.x, this.y, tileSize * 9 / 10, tileSize * 9 / 10, tileSize / 6);
-        fill(255 - darkModeColor/4);
+        fill(inkC);
         noStroke();
-        text(this.s, this.x, this.y);
+        textFont(font);
+        textAlign(CENTER, CENTER);
+        textSize(tileSize / 1.9);
+        text(this.s, 0, tileSize * 0.02);
+        pop();
     }
 
     this.move = function (r, c) {
