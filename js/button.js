@@ -52,8 +52,9 @@ function Button(x, y, s, id) {
                 this.drawArcArrow(s, -HALF_PI, PI * 0.75, true);
                 break;
             case "reset":
-                //clockwise, nearly-closed circle arrow
-                this.drawArcArrow(s, -HALF_PI, PI, false);
+                //two opposing half-circle arrows, like a refresh icon
+                this.drawArcArrow(s, -PI * 0.85, -PI * 0.15, false);
+                this.drawArcArrow(s, PI * 0.15, PI * 0.85, false);
                 break;
             case "prevsoln":
                 if (playingPrevSoln) {
