@@ -10,6 +10,7 @@ const THEME = {
 };
 let paperC, inkC, tileC, accentC; //current frame's colors, updated in draw()
 let dotsLayer; //pre-rendered notebook-dot background, rebuilt on resize
+let idleFrames = 0; //frames since anything last animated
 
 let boardSize = 4;
 let firstLoad = true;
@@ -48,9 +49,13 @@ let bigPointSound;
 function preload() {
     // pointSound = loadSound("sounds/mixkit-happy-bell-alert-601.wav");
     // bigPointSound = loadSound("sounds/mixkit-achievement-bell-600.wav");
-    font = loadFont("fonts/PatrickHand-Regular.ttf");
+    //string font names use the browser's native (glyph-cached) text rendering,
+    //which is far faster than p5's per-glyph path tracing of loaded fonts
+    font = "Patrick Hand";
     font2 = font;
-    icons = loadFont("fa.otf");
+    if (document.fonts) {
+        document.fonts.load("16px 'Patrick Hand'"); //the @font-face in index.html
+    }
 }
 
 function createBoard() {
@@ -232,6 +237,7 @@ function buildDotsLayer() {
 function windowResized() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
     canvas.position(0, 0);
+    idleFrames = 0; //the new canvas is blank, so repaint
 
     setTileSize();
     buildDotsLayer();
@@ -321,26 +327,54 @@ String.prototype.shuffle = function () {
     return a.join("");
 }
 
+//anything mid-animation? when false, frames can be skipped entirely
+function isAnimating() {
+    if (popup || playingPrevSoln || touchStartX != -1 || fadingTexts.length > 0) {
+        return true;
+    }
+    if (scorePulse > 0 || movesPulse > 0) {
+        return true;
+    }
+    if (Math.abs(darkModeColor - (darkMode ? 215 : 0)) > 0.5) {
+        return true;
+    }
+    for (let b of buttons) {
+        if (b.pulse > 0) {
+            return true;
+        }
+    }
+    for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
+            const t = board[r][c];
+            if (t.highlightDur > 0 ||
+                Math.abs(t.x - (width / 2 + t.c * tileSize - (boardSize - 1) / 2 * tileSize)) > 0.3 ||
+                Math.abs(t.y - (height / 2 + t.r * tileSize - (boardSize - 1) / 2 * tileSize)) > 0.3) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 function draw() {
     // console.log(frameRate());
     if (!boardCreated) {
-        // background(255);
-        // textSize(100);
-        // fill(0);
-        // noStroke();
-        // textAlign(CENTER, CENTER);
-        // text("LOADING", width/2, height/2);
-
         return;
     }
-    // if(board[0][0] == undefined) {
-    //     return;
-    // }
+
+    //skip rendering while nothing moves; one extra frame paints the settled state
+    if (isAnimating()) {
+        idleFrames = 0;
+    } else if (++idleFrames > 1) {
+        return;
+    }
 
     if (darkMode) {
         darkModeColor = lerp(darkModeColor, 215, 0.1);
+        if (215 - darkModeColor < 0.5) darkModeColor = 215;
     } else {
         darkModeColor = lerp(darkModeColor, 0, 0.1);
+        if (darkModeColor < 0.5) darkModeColor = 0;
     }
     updateThemeColors();
 

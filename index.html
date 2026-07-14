@@ -129,6 +129,12 @@
     }
 
     </style>
+
+    <script>
+      //start fetching the handwriting font before the sketch needs it (the @font-face above)
+      if (document.fonts) document.fonts.load("16px 'Patrick Hand'");
+    </script>
+
     <h1>Word Bord is a fun word puzzle. With movement inspired by a Rubik's cube, spin rows and columns to create words. Choose between a 4x4 or 5x5 bord and create as many unique words as possible in the limited number of moves. Every day has a unique bord.
     </h1>
 
