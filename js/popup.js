@@ -10,6 +10,11 @@ function Popup(id) {
     this.buttons = [];
     let iconSize = this.w / 12;
 
+    if (id == "gameover") {
+        this.stats = storageGet("wordbord-stats", { streak: 0, best: {}, games: 0 });
+        this.shared = false;
+    }
+
     this.links;
 
     if (id == "welcome") {
@@ -80,7 +85,7 @@ function Popup(id) {
 
         switch (id) {
             case "welcome":
-                text("Click and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nScore as many points as possible in 20 moves\n\nCome back every day for a new Word Bord!\n\n\nMade by Eric Xie", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
+                text("Click and drag to rotate rows and columns to create words\n\nChoose a 4x4 or 5x5 bord in the settings\n\nWords can be formed regularly or backwards on any row or column\n\nFinding several words with one spin earns a combo bonus\n\nScore as many points as possible in 20 moves\n\nCome back every day for a new Word Bord!\n\n\nMade by Eric Xie", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
 
                 if (this.links) {
                     this.links.forEach((link, i) => {
@@ -89,7 +94,26 @@ function Popup(id) {
                 }
                 break;
             case "gameover":
-                text(`Out of moves!\n\n\nYou scored ${score} points \n\nRestart to try again or come back tomorrow for a new Word Bord`, this.x, this.y - this.h / 4, this.w * 9 / 10);
+                const best = Math.max(this.stats.best[boardSize] || 0, score);
+                const streak = this.stats.streak || 0;
+                text(`Out of moves!\n\nYou scored ${score} points\n\nPersonal best: ${best}\nStreak: ${streak} day${streak == 1 ? "" : "s"}\n\nRestart to try again or come back tomorrow for a new Word Bord`, this.x, this.y - this.h / 3, this.w * 9 / 10);
+
+                //hand-drawn share button
+                const bw = this.w / 2.4;
+                const bh = this.h / 9;
+                const by = this.y + this.h / 3.2;
+                stroke(inkC);
+                strokeWeight(2.5);
+                fill(accentC);
+                rect(this.x, by, bw, bh, bh / 2.2);
+                noFill();
+                stroke(red(inkC), green(inkC), blue(inkC), 70);
+                rect(this.x, by, bw * 1.03, bh * 1.08, bh / 2);
+                noStroke();
+                fill(inkC);
+                textSize(bh / 2);
+                text(this.shared ? "Copied!" : "Share", this.x, by + bh * 0.04);
+                this.shareBounds = { x: this.x, y: by, w: bw, h: bh };
                 break;
             case "settings":
                 text("Settings", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
@@ -98,7 +122,7 @@ function Popup(id) {
                 if (playingPrevSoln) {
                     text("Click to exit replay", this.x, this.y - this.h / 3, this.w * 9 / 10);
                 } else {
-                    text("Click to see yesterday's maximum score\n\nWarning: this will erase your current progress", this.x, this.y - this.h / 3, this.w * 9 / 10);
+                    text("Click to see yesterday's maximum score\n\nYour game will be restored when the replay ends", this.x, this.y - this.h / 3, this.w * 9 / 10);
                 }
                 break;
         }
@@ -122,9 +146,25 @@ function Popup(id) {
             this.closing = true;
             return;
         }
+
+        if (id == "gameover" && this.shareBounds) {
+            const b = this.shareBounds;
+            if (Math.abs(mouseX - b.x) < b.w / 2 && Math.abs(mouseY - b.y) < b.h / 2) {
+                const day = daysSinceEpoch();
+                const shareText = `Word Bord #${day} (${boardSize}x${boardSize})\n${score} pts · ${wordsFound.length} word${wordsFound.length == 1 ? "" : "s"}\n🔥 ${this.stats.streak}-day streak\nhttps://wordbord.com`;
+                //native share sheet on touch devices, clipboard everywhere else
+                if (navigator.share && navigator.maxTouchPoints > 0) {
+                    navigator.share({ text: shareText }).catch(() => { });
+                } else if (navigator.clipboard) {
+                    this.shared = true;
+                    navigator.clipboard.writeText(shareText).catch(() => { });
+                }
+                return;
+            }
+        }
         if (id == "prevsoln") {
             if (playingPrevSoln) {
-                loadDailyBoard(0);
+                loadDailyBoard(0, () => restoreOrInitGame());
 
                 this.closing = true;
                 playingPrevSoln = false;

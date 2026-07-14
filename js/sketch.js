@@ -56,7 +56,7 @@ function preload() {
 function createBoard() {
     setTileSize();
     loadDailyBoard(0, () => {
-        checkWords();
+        restoreOrInitGame();
         boardCreated = true;
         loop();
     });
@@ -67,6 +67,93 @@ function daysSinceEpoch() {
     const ny = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
     const [y, m, d] = ny.split('-').map(Number);
     return Math.round((Date.UTC(y, m - 1, d) - EPOCH_UTC) / 86400000);
+}
+
+function storageGet(key, def) {
+    try {
+        const v = JSON.parse(localStorage.getItem(key));
+        return v === null || v === undefined ? def : v;
+    } catch (e) {
+        return def;
+    }
+}
+
+function storageSet(key, val) {
+    try {
+        localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) { }
+}
+
+function gameKey() {
+    return "wordbord-game-" + boardSize;
+}
+
+function saveGame() {
+    const prev = storageGet(gameKey(), {});
+    storageSet(gameKey(), {
+        day: daysSinceEpoch(),
+        score: score,
+        moves: moves,
+        wordsFound: wordsFound,
+        movesMade: movesMade,
+        counted: prev.day === daysSinceEpoch() ? !!prev.counted : false, //stats already tallied today
+    });
+}
+
+//restore today's saved game if there is one, otherwise start fresh
+function restoreOrInitGame() {
+    const save = storageGet(gameKey(), null);
+    if (save && save.day === daysSinceEpoch() && Array.isArray(save.movesMade)) {
+        save.movesMade.forEach(m => m.dir === "row" ? rotateRow(m.i, m.n) : rotateCol(m.i, m.n));
+        movesMade = save.movesMade;
+        wordsFound = save.wordsFound || [];
+        score = save.score || 0;
+        moves = save.moves;
+    } else {
+        checkWords();
+    }
+}
+
+//tally streak/best/games once per day, then pop the game over card
+function onGameOver() {
+    const today = daysSinceEpoch();
+    const save = storageGet(gameKey(), {});
+    const stats = storageGet("wordbord-stats", { streak: 0, lastDay: null, best: {}, games: 0 });
+    if (!(save.day === today && save.counted)) {
+        stats.games++;
+        if (stats.lastDay !== today) {
+            stats.streak = stats.lastDay === today - 1 ? stats.streak + 1 : 1;
+            stats.lastDay = today;
+        }
+        save.counted = true;
+        storageSet(gameKey(), save);
+    }
+    if ((stats.best[boardSize] || 0) < score) {
+        stats.best[boardSize] = score;
+    }
+    storageSet("wordbord-stats", stats);
+
+    setTimeout(() => {
+        if (moves <= 0 && !popup) {
+            popup = new Popup("gameover");
+        }
+    }, 1200); //let the last word's flash play out first
+}
+
+//finding several words with one spin earns a bonus
+function awardCombo(_found) {
+    if (_found.length < 2) {
+        return 0;
+    }
+    const bonus = (_found.length - 1) * 100;
+    score += bonus;
+    scorePulse = 12;
+    if (width > height) {
+        fadingTexts.push(new FadingText(width / 4, height / 2 + height / 10, "combo x" + _found.length + "! +" + bonus, 1.6));
+    } else {
+        fadingTexts.push(new FadingText(width / 2, height / 4 + height / 10, "combo x" + _found.length + "! +" + bonus, 1.6));
+    }
+    return bonus;
 }
 
 function mod(n, m) {
@@ -369,6 +456,7 @@ function updateReplay() {
         let _found = checkWords();
         moves--;
         movesPulse = 3;
+        awardCombo(_found);
         if (a == 0) {
             movesMade.push({ dir: "row", i: selectedRow, n: rot % boardSize, found: _found });
         } else {
@@ -459,10 +547,15 @@ function touchEnded() {
         let _found = checkWords();
         moves--;
         movesPulse = 3;
+        let bonus = awardCombo(_found);
         if (rotatingRows) {
-            movesMade.push({ dir: "row", i: selectedRow, n: rot % boardSize, found: _found });
+            movesMade.push({ dir: "row", i: selectedRow, n: rot % boardSize, found: _found, bonus: bonus });
         } else {
-            movesMade.push({ dir: "col", i: selectedCol, n: rot % boardSize, found: _found });
+            movesMade.push({ dir: "col", i: selectedCol, n: rot % boardSize, found: _found, bonus: bonus });
+        }
+        saveGame();
+        if (moves <= 0) {
+            onGameOver();
         }
     }
     touchStartX = -1;
@@ -576,6 +669,8 @@ function undo() {
             wordsFound.pop();
             score -= 100;
         }
+        score -= lastMove.bonus || 0;
+        saveGame();
     }
 }
 

@@ -1,8 +1,9 @@
-function FadingText(x, y, s) {
+function FadingText(x, y, s, scale) {
     this.life = 255;
     this.x = x;
     this.y = y;
     this.s = s;
+    this.scale = scale || 1;
     this.tilt = random(-0.08, 0.08); //scribbled-in-the-margin feel
 
     this.show = function () {
@@ -11,7 +12,7 @@ function FadingText(x, y, s) {
         rotate(this.tilt);
         fill(red(inkC), green(inkC), blue(inkC), this.life);
         noStroke();
-        textSize(height / 50 + width / 50);
+        textSize((height / 50 + width / 50) * this.scale);
         textFont(font2);
         text(this.s, 0, 0);
         pop();
