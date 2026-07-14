@@ -88,6 +88,33 @@ function gameKey() {
     return "wordbord-game-" + boardSize;
 }
 
+function saveSettings() {
+    storageSet("wordbord-settings", { darkMode: darkMode, boardSize: boardSize, showFound: showFound });
+}
+
+function loadSettings() {
+    const s = storageGet("wordbord-settings", null);
+    if (s) {
+        darkMode = !!s.darkMode;
+        showFound = s.showFound !== false;
+        boardSize = s.boardSize == 5 ? 5 : 4;
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        darkMode = true; //first visit: follow the system theme
+    }
+    if (darkMode) {
+        darkModeColor = 215; //skip the light-to-dark transition on load
+    }
+}
+
+//time until the next daily bord (midnight Eastern)
+function timeToNextBord() {
+    const [h, m, s] = new Date().toLocaleTimeString('en-GB', { timeZone: 'America/New_York', hour12: false }).split(':').map(Number);
+    const secs = 86400 - (h * 3600 + m * 60 + s);
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
+    return hrs > 0 ? hrs + "h " + mins + "m" : mins + "m " + (secs % 60) + "s";
+}
+
 function saveGame() {
     const prev = storageGet(gameKey(), {});
     storageSet(gameKey(), {
@@ -236,6 +263,7 @@ function setup() {
     if (firstLoad) {
         // popup = new Popup("welcome");
         firstLoad = false;
+        loadSettings();
     }
     noLoop();
     //wait for the dictionary before building the board so checkWords() sees a full word list
@@ -333,6 +361,14 @@ function draw() {
         movesPulse -= 0.5;
     }
     textAlign(CENTER, CENTER);
+    if (moves <= 3 && moves > 0 && !playingPrevSoln) {
+        //running low: swipe a highlighter stripe behind the counter
+        noStroke();
+        fill(red(accentC), green(accentC), blue(accentC), 170);
+        rectMode(CENTER);
+        rect(width / 2, height * 15 / 16, textWidth("Moves: " + moves) * 1.25, tileSize / 3, tileSize / 12);
+        fill(inkC);
+    }
     text("Moves: " + moves, width / 2, height * 15 / 16);
 
     textSize(tileSize * 0.9);
@@ -652,6 +688,13 @@ function scoreWord(str) {
 }
 
 function keyPressed() {
+    //cmd/ctrl+z to undo
+    if (keyCode === 90 && (keyIsDown(CONTROL) || keyIsDown(91) || keyIsDown(93))) {
+        if (!playingPrevSoln && !popup) {
+            undo();
+        }
+        return false;
+    }
 }
 
 function undo() {

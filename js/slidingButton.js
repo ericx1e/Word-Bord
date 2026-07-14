@@ -89,8 +89,9 @@ function SlidingButton(x, y, w, offset, id) {
     this.click = function () {
         if (this.touchingMouse()) {
             this.toggle = !this.toggle;
+            this.update();
+            saveSettings();
             if (id == "board size") {
-                this.update();
                 fadingTexts = [];
                 boardCreated = false;
                 board = [];

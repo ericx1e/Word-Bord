@@ -96,7 +96,7 @@ function Popup(id) {
             case "gameover":
                 const best = Math.max(this.stats.best[boardSize] || 0, score);
                 const streak = this.stats.streak || 0;
-                text(`Out of moves!\n\nYou scored ${score} points\n\nPersonal best: ${best}\nStreak: ${streak} day${streak == 1 ? "" : "s"}\n\nRestart to try again or come back tomorrow for a new Word Bord`, this.x, this.y - this.h / 3, this.w * 9 / 10);
+                text(`Out of moves!\n\nYou scored ${score} points\n\nPersonal best: ${best}\nStreak: ${streak} day${streak == 1 ? "" : "s"}\n\nNext bord in ${timeToNextBord()}`, this.x, this.y - this.h / 3, this.w * 9 / 10);
 
                 //hand-drawn share button
                 const bw = this.w / 2.4;
@@ -117,6 +117,25 @@ function Popup(id) {
                 break;
             case "settings":
                 text("Settings", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
+                break;
+            case "resetconfirm":
+                text("Start over?\n\nThis clears your words and moves for today's bord", this.x, this.y - this.h / 4, this.w * 9 / 10);
+
+                const rw = this.w / 2.4;
+                const rh = this.h / 9;
+                const ry = this.y + this.h / 8;
+                stroke(inkC);
+                strokeWeight(2.5);
+                fill(accentC);
+                rect(this.x, ry, rw, rh, rh / 2.2);
+                noFill();
+                stroke(red(inkC), green(inkC), blue(inkC), 70);
+                rect(this.x, ry, rw * 1.03, rh * 1.08, rh / 2);
+                noStroke();
+                fill(inkC);
+                textSize(rh / 2);
+                text("Reset", this.x, ry + rh * 0.04);
+                this.confirmBounds = { x: this.x, y: ry, w: rw, h: rh };
                 break;
             case "prevsoln":
                 if (playingPrevSoln) {
@@ -145,6 +164,15 @@ function Popup(id) {
         if (this.closing || dist(this.x + this.w / 2 - this.lineOffset, this.y - this.h / 2 + this.lineOffset, mouseX, mouseY) < this.lineLen * 2) {
             this.closing = true;
             return;
+        }
+
+        if (id == "resetconfirm" && this.confirmBounds) {
+            const b = this.confirmBounds;
+            if (Math.abs(mouseX - b.x) < b.w / 2 && Math.abs(mouseY - b.y) < b.h / 2) {
+                reset();
+                this.closing = true;
+                return;
+            }
         }
 
         if (id == "gameover" && this.shareBounds) {

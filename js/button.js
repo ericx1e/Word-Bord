@@ -16,6 +16,8 @@ function Button(x, y, s, id) {
         }
 
         const s = this.w + this.pulse;
+        //undo/reset fade out when there is nothing to undo
+        const a = this.enabled() ? 255 : 60;
 
         push();
         translate(this.x, this.y);
@@ -23,15 +25,15 @@ function Button(x, y, s, id) {
         rectMode(CENTER);
 
         //sticker-style backing to match the tiles
-        stroke(inkC);
+        stroke(red(inkC), green(inkC), blue(inkC), a);
         strokeWeight(Math.max(1.5, s / 16));
         fill(tileC);
         ellipse(0, 0, s * 1.75, s * 1.68);
         noFill();
-        stroke(red(inkC), green(inkC), blue(inkC), 70);
+        stroke(red(inkC), green(inkC), blue(inkC), Math.min(70, a));
         ellipse(0, 0, s * 1.84, s * 1.78);
 
-        stroke(inkC);
+        stroke(red(inkC), green(inkC), blue(inkC), a);
         strokeWeight(Math.max(1.5, s / 8));
         noFill();
 
@@ -106,11 +108,18 @@ function Button(x, y, s, id) {
         }
     }
 
+    this.enabled = function () {
+        return !((id == "undo" || id == "reset") && movesMade.length == 0);
+    }
+
     this.update = function () {
         if (playingPrevSoln) {
             if (this.disabledDuringReplay.includes(id)) {
                 return;
             }
+        }
+        if (!this.enabled()) {
+            return;
         }
         if (this.touchingMouse()) {
             this.pulse = this.w / 3;
@@ -122,7 +131,7 @@ function Button(x, y, s, id) {
                     undo();
                     break;
                 case "reset":
-                    reset();
+                    popup = new Popup("resetconfirm"); //confirm before wiping progress
                     break;
                 case "info":
                     popup = new Popup("welcome");
