@@ -309,28 +309,38 @@ function draw() {
     }
 
     if (showFound && width > height) { //no good way to list words on small windows and mobile
-        fill(inkC);
-        textAlign(CENTER, TOP);
-        let size = height / 30;
+        const size = height / 32;
+        const cx = width - width / 7;
+        const top = height / 9;
+
         textFont(font);
-        textSize(size);
-        strokeWeight(size / 30); //stroke for a bold effect
-        stroke(inkC);
-        text("Found:", width - width / 7, height / 9 - size);
+        fill(inkC);
         noStroke();
-        // size *= 0.8;
+        textAlign(CENTER, TOP);
+        textSize(size * 1.25);
+        text("Found: " + wordsFound.length, cx, top - size * 1.7);
+
+        //marker underline, echoing the title
+        stroke(accentC);
+        strokeWeight(size / 4);
+        line(cx - size * 2.3, top - size * 0.2, cx + size * 2.3, top - size * 0.2);
+        noStroke();
+
+        //one column while it fits, then two; oldest words collapse into "..."
+        const lineH = size * 1.35;
+        const rows = Math.max(1, Math.floor((height * 0.78 - top) / lineH));
+        const colW = size * 5;
+        let words = wordsFound;
+        if (words.length > rows * 2) {
+            words = wordsFound.slice(wordsFound.length - (rows * 2 - 1));
+            words.unshift("...");
+        }
         textSize(size);
-        // for (let i = 0; i < wordsFound.length; i++) {
-        //     //writes two words per row
-        //     text(wordsFound[i], width - width / 7 - 1.5 * size + 3 * size * (i % 2), height / 9 + Math.floor(i / 2) * size);
-        // }
-        for (let i = 0; i < movesMade.length; i++) {
-            let tx = "";
-            tx += join(movesMade[i].found, "\t");
-            // for (word in movesMade[i].found) {
-            //     tx.join(word;
-            // }
-            text(tx, width - width / 7, height / 9 + i * size);
+        for (let i = 0; i < words.length; i++) {
+            const col = Math.floor(i / rows);
+            const x = cx + (words.length > rows ? (col - 0.5) * colW : 0);
+            const y = top + size * 0.6 + (i % rows) * lineH;
+            text(words[i], x, y);
         }
     }
 

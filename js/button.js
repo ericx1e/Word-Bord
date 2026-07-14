@@ -5,6 +5,7 @@ function Button(x, y, s, id) {
     this.h = s;
     this.id = id;
     this.pulse = 0;
+    this.tilt = random(-0.09, 0.09); //fixed wobble so buttons look hand-placed
     this.disabledDuringReplay = ["undo", "reset", "settings"];
 
     this.show = function () {
@@ -13,59 +14,96 @@ function Button(x, y, s, id) {
                 return;
             }
         }
+
+        const s = this.w + this.pulse;
+
+        push();
+        translate(this.x, this.y);
+        rotate(this.tilt);
+        rectMode(CENTER);
+
+        //sticker-style backing to match the tiles
+        stroke(inkC);
+        strokeWeight(Math.max(1.5, s / 16));
+        fill(tileC);
+        ellipse(0, 0, s * 1.75, s * 1.68);
+        noFill();
+        stroke(red(inkC), green(inkC), blue(inkC), 70);
+        ellipse(0, 0, s * 1.84, s * 1.78);
+
+        stroke(inkC);
+        strokeWeight(Math.max(1.5, s / 8));
+        noFill();
+
         switch (id) {
-            case "settings":
-                noStroke();
-                fill(inkC);
-                textFont(icons);
-                textAlign(CENTER, CENTER);
-                textSize(this.w + this.pulse);
-                text('\uf1de', this.x, this.y);
-                // text('\uf013', mouseX, mouseY);
-                // text('\uf021', mouseX, mouseY);
-                break;
-            case "undo":
-                noStroke();
-                fill(inkC);
-                textFont(icons);
-                textAlign(CENTER, CENTER);
-                textSize(this.w + this.pulse);
-                text('\uf0e2', this.x, this.y);
-                break;
-            case "reset":
-                noStroke();
-                fill(inkC);
-                textFont(icons);
-                textAlign(CENTER, CENTER);
-                textSize(this.w + this.pulse);
-                text('\uf021', this.x, this.y);
-                break;
             case "info":
                 noStroke();
                 fill(inkC);
-                textFont(icons);
+                textFont(font);
                 textAlign(CENTER, CENTER);
-                textSize(this.w + this.pulse);
-                text('\uf129', this.x, this.y);
+                textSize(s * 1.2);
+                text("i", 0, s * 0.02);
+                break;
+            case "settings":
+                this.drawSliders(s);
+                break;
+            case "undo":
+                //counterclockwise arrow
+                this.drawArcArrow(s, -HALF_PI, PI * 0.75, true);
+                break;
+            case "reset":
+                //clockwise, nearly-closed circle arrow
+                this.drawArcArrow(s, -HALF_PI, PI, false);
                 break;
             case "prevsoln":
-                noStroke();
-                fill(inkC);
-                textFont(icons);
-                textAlign(CENTER, CENTER);
-                textSize(this.w + this.pulse);
                 if (playingPrevSoln) {
-                    text('\uf04d', this.x, this.y); //stop icon
+                    rect(0, 0, s * 0.75, s * 0.75, s * 0.18); //stop
                 } else {
-                    text('\uf122', this.x, this.y); //replay icon
+                    //play triangle
+                    beginShape();
+                    vertex(-s * 0.28, -s * 0.42);
+                    vertex(-s * 0.28, s * 0.42);
+                    vertex(s * 0.48, 0);
+                    endShape(CLOSE);
                 }
                 break;
         }
+
+        pop();
+
         if (this.pulse > 0) {
             this.pulse--;
         }
     }
 
+    //arc with a hand-drawn arrowhead; headAtStart flips which end gets the head
+    this.drawArcArrow = function (s, a0, a1, headAtStart) {
+        const r = s * 0.5;
+        arc(0, 0, r * 2, r * 2, a0, a1);
+
+        const a = headAtStart ? a0 : a1;
+        const px = r * Math.cos(a);
+        const py = r * Math.sin(a);
+        //tangent along the travel direction at this end
+        const t = headAtStart ? a - HALF_PI : a + HALF_PI;
+        const b = s * 0.34;
+        line(px, py, px + Math.cos(t + PI - 0.55) * b, py + Math.sin(t + PI - 0.55) * b);
+        line(px, py, px + Math.cos(t + PI + 0.55) * b, py + Math.sin(t + PI + 0.55) * b);
+    }
+
+    this.drawSliders = function (s) {
+        const l = s * 0.55;
+        const ys = [-s * 0.34, 0, s * 0.34];
+        const knobX = [l * 0.4, -l * 0.35, l * 0.1];
+        for (let i = 0; i < 3; i++) {
+            line(-l, ys[i], l, ys[i]);
+        }
+        fill(tileC);
+        strokeWeight(Math.max(1.5, s / 10));
+        for (let i = 0; i < 3; i++) {
+            circle(knobX[i], ys[i], s * 0.3);
+        }
+    }
 
     this.update = function () {
         if (playingPrevSoln) {
@@ -96,7 +134,8 @@ function Button(x, y, s, id) {
     }
 
     this.touchingMouse = function () {
-        return this.x - this.w / 2 < mouseX && this.x + this.w / 2 > mouseX && this.y - this.h / 2 < mouseY && this.y + this.h / 2 > mouseY;
+        //circular hit area matching the sticker badge
+        return dist(mouseX, mouseY, this.x, this.y) < this.w * 0.95;
     }
 
 }
