@@ -1,6 +1,5 @@
-const API_URL = "https://word-bord-api.herokuapp.com/api/v1";
-const days2022 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const TOTAL_MOVES = 20;
+const EPOCH_UTC = Date.UTC(2024, 0, 1); //day counter starts at 2024-01-01, matching the original API
 
 let boardSize = 4;
 let firstLoad = true;
@@ -20,10 +19,6 @@ let rotatingRows = false;
 let rotatingCols = false;
 let popup;
 let boardCreated = false;
-let scoreSent = false;
-let nameInputted = false;
-let minLeaderboardScore;
-let numLeaderboardScores;
 let playingPrevSoln = false;
 let replayStartFrame;
 let replayMoves;
@@ -50,50 +45,39 @@ function preload() {
 
 function createBoard() {
     setTileSize();
-    fetch(`${API_URL}/board/${boardSize}`, {
-        method: 'GET'
-    }).then(response => response.json()).then(data => {
-        // generate from API response
-        for (let r = 0; r < boardSize; r++) {
-            board[r] = [];
-            for (let c = 0; c < boardSize; c++) {
-                board[r][c] = new Tile(r, c, data[r][c].toUpperCase());
-            }
-        }
-
+    loadDailyBoard(0, () => {
         checkWords();
         boardCreated = true;
         loop();
-    })
+    });
+}
 
-    fetch(`${API_URL}/leaderboard`, { //get the minimum leaderboard score on load 
-        method: 'GET'
-    }).then(response => response.json()).then(data => {
-        /*
-        On success:
-        [
-            {
-                name: NAME,
-                score: score
-            }
-        ]
+function daysSinceEpoch() {
+    //boards roll over at midnight Eastern, matching the original API
+    const ny = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    const [y, m, d] = ny.split('-').map(Number);
+    return Math.round((Date.UTC(y, m - 1, d) - EPOCH_UTC) / 86400000);
+}
 
-        On err:
-        {
-            err: "ASDF"
-        }
-        */
+function mod(n, m) {
+    return ((n % m) + m) % m;
+}
 
-
-        if (data.err) {
-            console.log(data.err);
-        } else {
-            numLeaderboardScores = data.length;
-            if (numLeaderboardScores > 0) {
-                minLeaderboardScore = data[data.length - 1].score;
+//offset picks the day relative to today (0 = today, -1 = yesterday);
+//the day index wraps around so boards cycle when the pre-generated set runs out
+function loadDailyBoard(offset, done) {
+    loadStrings(`boards/boards${boardSize}.txt`, lines => {
+        const rows = lines.filter(line => line.length >= boardSize);
+        const numBoards = Math.floor(rows.length / boardSize);
+        const index = mod(daysSinceEpoch() + offset, numBoards);
+        for (let r = 0; r < boardSize; r++) {
+            board[r] = [];
+            for (let c = 0; c < boardSize; c++) {
+                board[r][c] = new Tile(r, c, rows[index * boardSize + r][c].toUpperCase());
             }
         }
-    })
+        if (done) done();
+    });
 }
 
 function setTileSize() {
@@ -130,8 +114,8 @@ function setup() {
         firstLoad = false;
     }
     noLoop();
-    dict = loadStrings("dictionaries/words" + boardSize + ".txt");
-    createBoard()
+    //wait for the dictionary before building the board so checkWords() sees a full word list
+    dict = loadStrings("dictionaries/words" + boardSize + ".txt", () => createBoard());
 
     createButtons();
 
@@ -161,7 +145,6 @@ function createButtons() {
         buttons.push(new Button(width - shift, height - shift, size, "settings"));
         buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
         buttons.push(new Button(width - 3 * shift, height - shift, size, "reset"));
-        buttons.push(new Button(width - 4 * shift, height - shift, size, "leaderboard"));
     } else {
         shift *= 1.15;
         size *= 1.25;
@@ -170,7 +153,6 @@ function createButtons() {
         buttons.push(new Button(width - shift, height - shift, size, "settings"));
         buttons.push(new Button(width - 2 * shift, height - shift, size, "undo"));
         buttons.push(new Button(width - shift, height - 2 * shift, size, "reset"));
-        buttons.push(new Button(width - 2 * shift, height - 2 * shift, size, "leaderboard"));
     }
 }
 
@@ -408,12 +390,6 @@ function touchStarted() {
     selectedCol = parseInt((mouseX - width / 2 + tileSize * (boardSize - 1) / 2 + tileSize / 2) / tileSize);
     if (selectedRow >= 0 && selectedRow < boardSize && selectedCol >= 0 && selectedCol < boardSize) {
         if (moves <= 0) {
-            if (!scoreSent) {
-                if (numLeaderboardScores < 10 || score > minLeaderboardScore) {
-                    popup = new Popup("name");
-                    return;
-                }
-            }
             popup = new Popup("gameover");
             return false;
         }
@@ -438,20 +414,6 @@ function touchEnded() {
         } else {
             movesMade.push({ dir: "col", i: selectedCol, n: rot % boardSize, found: _found });
         }
-        // fetch(`${API_URL}/checkgame`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({
-        //         name: 'buh',
-        //         score: score,
-        //         boardSize: boardSize,
-        //         moves: movesMade
-        //     })
-        // }).then(response => response.json()).then(data => {
-        //     console.log(data);
-        // })
     }
     touchStartX = -1;
     touchStartY = -1;
@@ -572,6 +534,4 @@ function reset() {
         undo();
         i--;
     }
-    scoreSent = false;
-    nameInputted = false;
 }

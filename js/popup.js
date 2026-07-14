@@ -8,8 +8,6 @@ function Popup(id) {
     this.lineOffset = this.lineLen * 3;
     this.closing = false;
     this.buttons = [];
-    this.data;
-    this.gotData = false;
     let iconSize = this.w / 12;
 
     this.links;
@@ -34,33 +32,6 @@ function Popup(id) {
         this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, 0, "show found"));
         // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 8, "dark mode"));
         // this.buttons.push(new SlidingButton(this.x + this.w * 6 / 16, this.y, this.w, this.h / 4, "dark mode"));
-    }
-    else if (id == "leaderboard") {
-        fetch(`${API_URL}/leaderboard`, {
-            method: 'GET'
-        }).then(response => response.json()).then(data => {
-            /*
-            On success:
-            [
-                {
-                    name: NAME,
-                    score: score
-                }
-            ]
-    
-            On err:
-            {
-                err: "ASDF"
-            }
-            */
-
-            if (data.err) {
-                console.log(data.err);
-            } else {
-                this.data = data;
-                this.gotData = true;
-            }
-        })
     }
 
     this.show = function () {
@@ -116,22 +87,6 @@ function Popup(id) {
             case "settings":
                 text("Settings", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
                 break;
-            case "leaderboard":
-                if (!this.gotData) {
-                    text("Error getting scores", this.x, this.y);
-                } else {
-                    text("Today's Top Scores", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
-                    for (let i = 0; i < this.data.length; i++) {
-                        textAlign(LEFT, CENTER);
-                        text(this.data[i].name, this.x - this.w * 9 / 20, this.y - this.h / 3 + this.h / 13 * i);
-                        textAlign(RIGHT, CENTER);
-                        text(this.data[i].score, this.x + this.w * 9 / 20, this.y - this.h / 3 + this.h / 13 * i);
-                    }
-                }
-                break;
-            case "name":
-                text("New High Score!\n\n\nClick to enter your name", this.x, this.y - this.h / 2.5, this.w * 9 / 10);
-                break;
             case "prevsoln":
                 if (playingPrevSoln) {
                     text("Click to exit replay", this.x, this.y - this.h / 3, this.w * 9 / 10);
@@ -160,97 +115,19 @@ function Popup(id) {
             this.closing = true;
             return;
         }
-        if (id == "name" && !scoreSent) {
-            let name = prompt("Enter your name (6 characters max)");
-            fetch(`${API_URL}/leaderboard`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: name,
-                    score: score,
-                    boardSize: boardSize,
-                    moves: movesMade
-                })
-            }).then(response => response.json()).then(data => {
-                // do something with the data
-                /*
-                ON SUCCESS
-                {
-                    name: "TEST",
-                    score: 0
-                }
-    
-                ON FAILURE
-                {
-                    err: "ERROR MESSAGE"
-                }
-    
-                if (data.err) // if it's not null
-                    // ERROR HANDLING
-                else // display score
-                */
-                if (data.err) {
-                    console.log(data.err);
-                    if (data.err == "Error: Name not allowed.") {
-                        name = prompt("Invalid name");
-                    } else {
-                        //invalid board so we just close everything lol
-                        scoreSent = true;
-                        this.closing = true;
-                    }
-                } else {
-                    scoreSent = true;
-                    this.closing = true;
-                }
-            })
-        }
-
         if (id == "prevsoln") {
             if (playingPrevSoln) {
-                fetch(`${API_URL}/board/${boardSize}`, {
-                    method: 'GET'
-                }).then(response => response.json()).then(data => {
-                    if (data.err) {
-                        console.log(data.err);
-                    } else {
-                        for (let r = 0; r < boardSize; r++) {
-                            board[r] = [];
-                            for (let c = 0; c < boardSize; c++) {
-                                board[r][c] = new Tile(r, c, data[r][c].toUpperCase());
-                            }
-                        }
-                    }
-                })
+                loadDailyBoard(0);
 
                 this.closing = true;
                 playingPrevSoln = false;
             } else {
-                fetch(`${API_URL}/prevboard/${boardSize}`, {
-                    method: 'GET'
-                }).then(response => response.json()).then(data => {
-                    if (data.err) {
-                        console.log(data.err);
-                    } else {
-                        for (let r = 0; r < boardSize; r++) {
-                            board[r] = [];
-                            for (let c = 0; c < boardSize; c++) {
-                                board[r][c] = new Tile(r, c, data[r][c].toUpperCase());
-                            }
-                        }
-                    }
-                })
+                loadDailyBoard(-1); //yesterday's board
 
-                fetch(`${API_URL}/solutions/${boardSize}`, {
-                    method: 'GET'
-                }).then(response => response.json()).then(data => {
-                    if (data.err) {
-                        console.log(data.err);
-                    } else {
-                        replayMoves = data.split(' ');
-                    }
-                })
+                loadStrings(`boards/solutions${boardSize}.txt`, lines => {
+                    const rows = lines.filter(line => line.length > 0);
+                    replayMoves = rows[mod(daysSinceEpoch() - 1, rows.length)].trim().split(' ');
+                });
 
                 this.closing = true;
                 playingPrevSoln = true;

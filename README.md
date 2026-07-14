@@ -9,7 +9,7 @@
 <br>
   
 ## About
-Rotate rows and columns to form words in this daily Scrabble meets Rubik's Cube game. Score as many points in the limit number of moves and secure a spot on the leaderboard!
+Rotate rows and columns to form words in this daily Scrabble meets Rubik's Cube game. Score as many points as possible in the limited number of moves!
 
 
 ## How to play
@@ -17,8 +17,7 @@ Rotate rows and columns to form words in this daily Scrabble meets Rubik's Cube 
 <li>Click on the bord and drag to spin the bord up to 20 moves
 <li>Each unique word earns 100 points
 <li>Words can be created backwards
-<li>When out of moves, click on the bord and enter your name to submit to the leaderboard
-<li>See the leaderboard, undo a move, restart, and change the settings using the buttons in the bottom right
+<li>Undo a move, restart, and change the settings using the buttons in the bottom right
 <li>A new bord is available every day at 12am
 </ul>
 

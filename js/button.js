@@ -5,7 +5,7 @@ function Button(x, y, s, id) {
     this.h = s;
     this.id = id;
     this.pulse = 0;
-    this.disabledDuringReplay = ["undo", "reset", "leaderboard", "settings"];
+    this.disabledDuringReplay = ["undo", "reset", "settings"];
 
     this.show = function () {
         if (playingPrevSoln) {
@@ -48,14 +48,6 @@ function Button(x, y, s, id) {
                 textSize(this.w + this.pulse);
                 text('\uf129', this.x, this.y);
                 break;
-            case "leaderboard":
-                noStroke();
-                fill(0 + darkModeColor);
-                textFont(icons);
-                textAlign(CENTER, CENTER);
-                textSize(this.w + this.pulse);
-                text('\uf091', this.x, this.y);
-                break;
             case "prevsoln":
                 noStroke();
                 fill(0 + darkModeColor);
@@ -95,9 +87,6 @@ function Button(x, y, s, id) {
                     break;
                 case "info":
                     popup = new Popup("welcome");
-                    break;
-                case "leaderboard":
-                    popup = new Popup("leaderboard");
                     break;
                 case "prevsoln":
                     popup = new Popup("prevsoln");

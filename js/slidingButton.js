@@ -102,7 +102,6 @@ function SlidingButton(x, y, w, offset, id) {
                 preload();
                 setup();
                 popup.closing = true;
-                scoreSent = false;
             }
         }
     }
